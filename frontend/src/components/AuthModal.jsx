@@ -173,7 +173,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. gaurav"
+                placeholder="e.g. shadow_coder"
                 style={{
                   width: '100%',
                   background: 'rgba(13, 17, 26, 0.8)',
