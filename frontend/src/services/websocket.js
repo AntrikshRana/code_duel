@@ -7,6 +7,7 @@ export class BattleSocket {
     this.connect();
   }
 
+  connect() {
     let wsUrl;
     const backendUrl = import.meta.env.VITE_API_URL;
     if (backendUrl) {
