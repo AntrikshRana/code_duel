@@ -69,6 +69,7 @@ export const api = {
   },
   getMe: async () => request('/auth/me/'),
   getLeaderboard: async () => request('/auth/leaderboard/'),
+  getOnlineStats: async () => request('/auth/online-stats/'),
 
   // Problems
   getProblems: async () => request('/problems/'),

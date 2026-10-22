@@ -6,7 +6,8 @@ import CodeWorkspace from './components/CodeWorkspace';
 import BattleLobby from './components/BattleLobby';
 import BattleRoom from './components/BattleRoom';
 import Leaderboard from './components/Leaderboard';
-import { api, getCurrentUserStored, removeAuthToken } from './services/api';
+import OnlinePresenceBar from './components/OnlinePresenceBar';
+import { api, getCurrentUserStored, removeAuthToken, setCurrentUserStored } from './services/api';
 
 export default function App() {
   const [user, setUser] = useState(getCurrentUserStored());
@@ -115,6 +116,9 @@ export default function App() {
           <Leaderboard />
         )}
       </main>
+
+      {/* Realtime Live Online Presence Bottom Bar */}
+      <OnlinePresenceBar />
 
       <AuthModal 
         isOpen={isAuthModalOpen}
