@@ -96,4 +96,18 @@ export const api = {
   },
   getBattle: async (room_code) => request(`/battles/${room_code}/`),
   getActiveBattles: async () => request('/battles/active/'),
+
+  // Matchmaking Queue
+  joinMatchmaking: async (difficulty = 'ANY') => {
+    return request('/battles/matchmaking/join/', {
+      method: 'POST',
+      body: JSON.stringify({ difficulty })
+    });
+  },
+  checkMatchmakingStatus: async () => request('/battles/matchmaking/status/'),
+  leaveMatchmaking: async () => {
+    return request('/battles/matchmaking/leave/', {
+      method: 'POST'
+    });
+  },
 };

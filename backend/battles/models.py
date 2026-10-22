@@ -72,3 +72,13 @@ class BattleEvent(models.Model):
 
     def __str__(self):
         return f"{self.battle.room_code} - {self.event_type} at {self.timestamp}"
+
+class MatchmakingQueue(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='matchmaking_ticket')
+    rating = models.IntegerField(default=1200)
+    difficulty_preference = models.CharField(max_length=10, default='ANY')
+    matched_room_code = models.CharField(max_length=10, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Queue: {self.user.username} ({self.rating} pts)"

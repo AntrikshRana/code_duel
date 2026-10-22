@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Swords, Plus, LogIn, Users, Flame, Zap, Trophy, Shield, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Swords, Plus, LogIn, Users, Flame, Zap, Trophy, Shield, RefreshCw, Radio, X, CheckCircle2, Sparkles } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
@@ -9,10 +9,27 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
   const [joinError, setJoinError] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Matchmaking State
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchSeconds, setSearchSeconds] = useState(0);
+  const [difficultyPref, setDifficultyPref] = useState('ANY');
+  const [matchedPayload, setMatchedPayload] = useState(null);
+
+  const searchTimerRef = useRef(null);
+  const pollTimerRef = useRef(null);
+
   useEffect(() => {
     fetchActiveBattles();
     const interval = setInterval(fetchActiveBattles, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Cleanup matchmaking on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimerRef.current) clearInterval(searchTimerRef.current);
+      if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    };
   }, []);
 
   const fetchActiveBattles = async () => {
@@ -26,29 +43,74 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
     }
   };
 
-  const handleQuickMatch = async () => {
+  // ==========================================
+  // ELO MATCHMAKING HANDLERS
+  // ==========================================
+  const startMatchmaking = async () => {
     if (!user) {
       onOpenAuth();
       return;
     }
-    setActionLoading(true);
     setJoinError('');
+    setIsSearching(true);
+    setSearchSeconds(0);
+    setMatchedPayload(null);
+
+    // Start timer counter
+    searchTimerRef.current = setInterval(() => {
+      setSearchSeconds(s => s + 1);
+    }, 1000);
 
     try {
-      // Check if there is an active battle waiting for player 2
-      const waiting = activeBattles.find(b => b.status === 'WAITING' && b.player1 !== user.id);
-      if (waiting) {
-        const joined = await api.joinBattle(waiting.room_code);
-        onEnterBattle(joined.room_code);
-      } else {
-        // Create new room
-        const created = await api.createBattle();
-        onEnterBattle(created.room_code);
+      const res = await api.joinMatchmaking(difficultyPref);
+      if (res.matched) {
+        // Immediate match found!
+        handleMatchSuccess(res);
+        return;
       }
+
+      // No immediate opponent; poll queue every 2 seconds
+      pollTimerRef.current = setInterval(async () => {
+        try {
+          const status = await api.checkMatchmakingStatus();
+          if (status.matched) {
+            handleMatchSuccess(status);
+          }
+        } catch (e) {
+          console.error("Matchmaking poll error", e);
+        }
+      }, 2000);
+
     } catch (err) {
-      setJoinError(err.message || 'Failed to initialize match.');
-    } finally {
-      setActionLoading(false);
+      setJoinError(err.message || 'Failed to enter matchmaking queue.');
+      stopMatchmaking();
+    }
+  };
+
+  const handleMatchSuccess = (payload) => {
+    if (searchTimerRef.current) clearInterval(searchTimerRef.current);
+    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    setMatchedPayload(payload);
+
+    // Auto-enter battle room after 2 seconds
+    setTimeout(() => {
+      setIsSearching(false);
+      setMatchedPayload(null);
+      onEnterBattle(payload.room_code);
+    }, 2200);
+  };
+
+  const stopMatchmaking = async () => {
+    if (searchTimerRef.current) clearInterval(searchTimerRef.current);
+    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+    setIsSearching(false);
+    setSearchSeconds(0);
+    setMatchedPayload(null);
+
+    try {
+      await api.leaveMatchmaking();
+    } catch (e) {
+      // ignore
     }
   };
 
@@ -89,6 +151,14 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
     }
   };
 
+  const myRating = user?.profile?.rating || 1200;
+  const ratingRangeMin = Math.max(100, myRating - 150 - Math.floor(searchSeconds / 5) * 50);
+  const ratingRangeMax = myRating + 150 + Math.floor(searchSeconds / 5) * 50;
+
+  const searchMinutes = Math.floor(searchSeconds / 60);
+  const searchSecs = searchSeconds % 60;
+  const formattedSearchTime = `${String(searchMinutes).padStart(2, '0')}:${String(searchSecs).padStart(2, '0')}`;
+
   return (
     <div style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
       {/* Hero Battle Banner */}
@@ -101,7 +171,7 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
         border: '1px solid rgba(244, 63, 94, 0.25)',
         background: 'linear-gradient(135deg, rgba(20, 27, 42, 0.9) 0%, rgba(30, 15, 30, 0.8) 100%)'
       }}>
-        <div style={{ maxWidth: '650px', position: 'relative', zIndex: 2 }}>
+        <div style={{ maxWidth: '680px', position: 'relative', zIndex: 2 }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -118,44 +188,68 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
             textTransform: 'uppercase'
           }}>
             <Zap size={14} />
-            Real-Time Competitive Matchmaking
+            ELO Competitive Matchmaking Engine
           </div>
 
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '1rem' }}>
-            DUEL CODERS IN <br />
+            FIND AN OPPONENT & <br />
             <span style={{
               background: 'linear-gradient(90deg, #f43f5e, #a855f7, #00f2fe)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent'
             }}>
-              REAL-TIME 1v1 BATTLES
+              CLASH IN REAL-TIME 1v1
             </span>
           </h1>
 
           <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
-            Both coders receive the exact same challenge simultaneously. The first player whose solution passes all automated test cases wins the duel and gains rating points.
+            Queue up to be paired automatically with a coder of similar rating. 5-minute thinking phase, 15-35 min difficulty timers, and time-complexity bonus points!
           </p>
+
+          {/* Difficulty Preference Selector */}
+          <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Queue Preference:</span>
+            {['ANY', 'EASY', 'MEDIUM', 'HARD'].map(diff => (
+              <button
+                key={diff}
+                onClick={() => setDifficultyPref(diff)}
+                style={{
+                  background: difficultyPref === diff ? 'rgba(0, 242, 254, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  border: difficultyPref === diff ? '1px solid #00f2fe' : '1px solid var(--border-subtle)',
+                  color: difficultyPref === diff ? '#00f2fe' : 'var(--text-muted)',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {diff === 'ANY' ? 'Any Challenge' : diff}
+              </button>
+            ))}
+          </div>
 
           {/* Action Row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <button 
-              onClick={handleQuickMatch}
-              disabled={actionLoading}
+              onClick={startMatchmaking}
+              disabled={isSearching}
               className="battle-btn"
-              style={{ fontSize: '1rem', padding: '0.8rem 1.75rem' }}
+              style={{ fontSize: '1rem', padding: '0.85rem 1.85rem' }}
             >
               <Swords size={20} />
-              <span>{actionLoading ? 'Searching Arena...' : 'Quick 1v1 Match'}</span>
+              <span>Enter Matchmaking Queue</span>
             </button>
 
             <button 
               onClick={handleCreateRoom}
-              disabled={actionLoading}
+              disabled={isSearching || actionLoading}
               className="secondary-btn"
-              style={{ fontSize: '0.95rem', padding: '0.8rem 1.4rem' }}
+              style={{ fontSize: '0.95rem', padding: '0.85rem 1.4rem' }}
             >
               <Plus size={18} />
-              <span>Create Custom Room</span>
+              <span>Create Private Room</span>
             </button>
           </div>
 
@@ -179,7 +273,7 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
         }} />
       </div>
 
-      {/* Join By Room Code Box */}
+      {/* Join By Room Code Box & Active Rooms List */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', alignItems: 'start' }}>
         <div className="glass-panel" style={{ padding: '1.75rem' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -187,7 +281,7 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
             Join with Room Code
           </h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem' }}>
-            Have a friend's room code? Enter the 6-character code below to jump directly into the room.
+            Enter a friend's 6-character room code to join their custom battle arena.
           </p>
 
           <form onSubmit={handleJoinWithCode} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
@@ -246,7 +340,7 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
               <Swords size={36} color="var(--text-dim)" style={{ marginBottom: '0.75rem' }} />
               <div style={{ fontSize: '1rem', fontWeight: 600 }}>No active rooms waiting right now.</div>
               <p style={{ fontSize: '0.85rem', marginTop: '0.3rem' }}>
-                Hit "Quick 1v1 Match" or "Create Custom Room" to start the first battle!
+                Hit "Enter Matchmaking Queue" to find an opponent!
               </p>
             </div>
           ) : (
@@ -318,6 +412,130 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
           )}
         </div>
       </div>
+
+      {/* ========================================== */}
+      {/* ANIMATED MATCHMAKING RADAR OVERLAY MODAL */}
+      {/* ========================================== */}
+      {isSearching && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(7, 9, 14, 0.88)',
+          backdropFilter: 'blur(16px)',
+          zIndex: 3000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1.5rem'
+        }}>
+          <div className="glass-panel" style={{
+            maxWidth: '480px',
+            width: '100%',
+            padding: '2.5rem',
+            textAlign: 'center',
+            position: 'relative',
+            border: matchedPayload ? '1px solid rgba(0, 242, 254, 0.5)' : '1px solid rgba(244, 63, 94, 0.35)',
+            boxShadow: matchedPayload ? 'var(--shadow-glow-cyan)' : 'var(--shadow-glow-battle)'
+          }}>
+            {!matchedPayload ? (
+              <>
+                {/* Radar sweep icon */}
+                <div style={{ position: 'relative', width: '90px', height: '90px', margin: '0 auto 1.5rem auto' }}>
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    border: '2px dashed rgba(244, 63, 94, 0.4)',
+                    animation: 'spin 8s linear infinite'
+                  }} />
+                  <div style={{
+                    position: 'absolute',
+                    inset: '12px',
+                    borderRadius: '50%',
+                    border: '2px solid rgba(0, 242, 254, 0.4)',
+                    animation: 'spin 4s linear infinite reverse'
+                  }} />
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Radio size={36} color="var(--accent-rose)" className="animate-pulse-subtle" />
+                  </div>
+                </div>
+
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.7rem', fontWeight: 800, marginBottom: '0.4rem' }}>
+                  Searching for Gladiator...
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+                  Matching against players near your skill tier ({ratingRangeMin} - {ratingRangeMax} pts)
+                </p>
+
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  padding: '0.85rem 1.25rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '1.75rem',
+                  fontFamily: 'var(--font-code)'
+                }}>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Queue Elapsed</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>{formattedSearchTime}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>Your Rating</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#fbbf24' }}>{myRating} pts</div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={stopMatchmaking}
+                  className="secondary-btn"
+                  style={{ width: '100%', justifyContent: 'center', padding: '0.7rem' }}
+                >
+                  <X size={16} />
+                  <span>Cancel Matchmaking</span>
+                </button>
+              </>
+            ) : (
+              /* MATCH FOUND BANNER */
+              <div>
+                <div style={{
+                  width: '72px',
+                  height: '72px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #00f2fe, #3b82f6)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '1rem',
+                  boxShadow: 'var(--shadow-glow-cyan)'
+                }}>
+                  <CheckCircle2 size={40} color="#07090e" />
+                </div>
+
+                <div style={{ color: 'var(--accent-cyan)', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>
+                  MATCH FOUND!
+                </div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 900, marginBottom: '0.5rem' }}>
+                  Opponent Found!
+                </h2>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+                  Preparing 1v1 arena... Connecting both gladiators now!
+                </p>
+
+                <div className="animate-spin" style={{ width: '24px', height: '24px', border: '3px solid var(--accent-cyan)', borderTopColor: 'transparent', borderRadius: '50%', margin: '0 auto' }} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
