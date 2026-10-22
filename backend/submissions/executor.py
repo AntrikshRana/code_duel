@@ -215,16 +215,35 @@ def execute_submission(submission):
             battle.status = 'COMPLETED'
             battle.end_time = now
             
-            # Update user ratings (+25 for winner, -15 for loser)
+            # Complexity & Performance points formula
+            diff = problem.difficulty.upper()
+            base_points = 25 if diff == 'EASY' else (45 if diff == 'MEDIUM' else 70)
+            
+            # Time complexity execution speed bonus (lower runtime_ms indicates optimal time complexity)
+            if max_time_ms < 40:
+                comp_bonus = 25 # Highly optimal O(1) / O(N)
+            elif max_time_ms < 120:
+                comp_bonus = 15 # Efficient O(N log N)
+            elif max_time_ms < 250:
+                comp_bonus = 8  # Moderate
+            else:
+                comp_bonus = 4
+
+            total_gain = base_points + comp_bonus
+            battle.winner_points_gained = total_gain
+            battle.complexity_bonus = comp_bonus
+
+            # Update user ratings
             winner_prof = submission.user.profile
-            winner_prof.rating += 25
+            winner_prof.rating += total_gain
             winner_prof.wins += 1
             winner_prof.save()
 
             opponent = battle.player2 if is_p1 else battle.player1
             if opponent:
                 opp_prof = opponent.profile
-                opp_prof.rating = max(100, opp_prof.rating - 15)
+                penalty = 12 if diff == 'EASY' else (18 if diff == 'MEDIUM' else 24)
+                opp_prof.rating = max(100, opp_prof.rating - penalty)
                 opp_prof.losses += 1
                 opp_prof.save()
 

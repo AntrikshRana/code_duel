@@ -34,10 +34,31 @@ class Battle(models.Model):
     
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
-    duration_seconds = models.PositiveIntegerField(default=900) # 15 minutes standard
+
+    # 5 min Thinking Phase (300s) + Coding Phase (Easy: 15m, Med: 25m, Hard: 35m)
+    thinking_seconds = models.PositiveIntegerField(default=300)
+    coding_seconds = models.PositiveIntegerField(default=900)
+    duration_seconds = models.PositiveIntegerField(default=1200)
+
+    # Points earned breakdown
+    winner_points_gained = models.IntegerField(default=0)
+    complexity_bonus = models.IntegerField(default=0)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.problem:
+            self.thinking_seconds = 300 # 5 minutes thinking time
+            diff = self.problem.difficulty.upper()
+            if diff == 'EASY':
+                self.coding_seconds = 15 * 60 # 15 minutes (900s)
+            elif diff == 'MEDIUM':
+                self.coding_seconds = 25 * 60 # 25 minutes (1500s)
+            elif diff == 'HARD':
+                self.coding_seconds = 35 * 60 # 35 minutes (2100s)
+            self.duration_seconds = self.thinking_seconds + self.coding_seconds
+        super().save(*args, **kwargs)
 
     def __str__(self):
         p2_name = self.player2.username if self.player2 else "Waiting..."

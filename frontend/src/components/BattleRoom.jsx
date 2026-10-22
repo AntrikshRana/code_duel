@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import confetti from 'canvas-confetti';
-import { Swords, Clock, Send, Trophy, ArrowLeft, Terminal, Shield, CheckCircle2, XCircle, AlertCircle, Sparkles, Copy, Check } from 'lucide-react';
+import { Swords, Clock, Send, Trophy, ArrowLeft, Terminal, Shield, CheckCircle2, XCircle, AlertCircle, Sparkles, Copy, Check, Brain, Zap } from 'lucide-react';
 import { api } from '../services/api';
 import { BattleSocket } from '../services/websocket';
 
@@ -20,7 +20,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
     totalTestCases: 0
   });
 
-  const [timeLeft, setTimeLeft] = useState(900); // 15 mins
+  const [timeLeft, setTimeLeft] = useState(1200);
   const [copiedCode, setCopiedCode] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
   
@@ -65,6 +65,9 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
     try {
       const data = await api.getBattle(roomCode);
       setBattle(data);
+      if (data.duration_seconds && timeLeft === 1200) {
+        setTimeLeft(data.duration_seconds);
+      }
       if (data.problem_details) {
         if (language === 'python') setCode(data.problem_details.starter_code_python);
         else if (language === 'cpp') setCode(data.problem_details.starter_code_cpp);
@@ -117,7 +120,6 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
 
   const handleEditorChange = (val) => {
     setCode(val || '');
-    // Broadcast progress debounce
     if (socketRef.current && user) {
       socketRef.current.send('code_progress', {
         username: user.username,
@@ -140,7 +142,6 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
       });
       setSubmissionResult(res);
 
-      // Notify opponent via websocket
       if (socketRef.current && user) {
         socketRef.current.send('code_progress', {
           username: user.username,
@@ -157,7 +158,6 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
         }
       }
 
-      // Re-fetch updated battle state
       fetchBattleData();
     } catch (err) {
       setSubmissionResult({
@@ -184,8 +184,13 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
   const oppName = isPlayer1 ? battle.player2_name : battle.player1_name;
   const oppRating = isPlayer1 ? battle.player2_rating : battle.player1_rating;
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  // Thinking Phase (first 5 min) vs Coding Phase
+  const codingDuration = battle.coding_seconds || 900;
+  const isThinkingPhase = timeLeft > codingDuration;
+  const displayTimerSeconds = isThinkingPhase ? (timeLeft - codingDuration) : timeLeft;
+
+  const minutes = Math.floor(displayTimerSeconds / 60);
+  const seconds = displayTimerSeconds % 60;
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
   const isCompleted = battle.status === 'COMPLETED';
@@ -233,7 +238,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
           </div>
         </div>
 
-        {/* Center: 1v1 Matchup Head-to-Head */}
+        {/* Center: 1v1 Matchup Head-to-Head + Phase Timer */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           {/* Player 1 (You) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', textAlign: 'right' }}>
@@ -261,7 +266,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
             </div>
           </div>
 
-          {/* VS & Timer */}
+          {/* VS & Timer with Thinking vs Coding indicator */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{
               display: 'flex',
@@ -270,13 +275,19 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
               fontFamily: 'var(--font-code)',
               fontWeight: 800,
               fontSize: '1.25rem',
-              color: timeLeft < 180 ? '#f87171' : '#ffffff'
+              color: isThinkingPhase ? '#fbbf24' : (displayTimerSeconds < 180 ? '#f87171' : '#ffffff')
             }}>
-              <Clock size={16} color={timeLeft < 180 ? '#f87171' : 'var(--accent-cyan)'} />
+              {isThinkingPhase ? <Brain size={18} color="#fbbf24" /> : <Clock size={16} color="var(--accent-cyan)" />}
               {formattedTime}
             </div>
-            <div style={{ fontSize: '0.65rem', color: 'var(--accent-rose)', fontWeight: 800, letterSpacing: '0.1em' }}>
-              1v1 CLASH
+            <div style={{
+              fontSize: '0.65rem',
+              color: isThinkingPhase ? '#fbbf24' : 'var(--accent-rose)',
+              fontWeight: 800,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase'
+            }}>
+              {isThinkingPhase ? 'Thinking Phase (5m)' : 'Coding Phase Live'}
             </div>
           </div>
 
@@ -323,44 +334,53 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
             ) : (
               <>
                 <Send size={15} />
-                <span>Submit Solution</span>
+                <span>{isThinkingPhase ? 'Submit Early Solution' : 'Submit Solution'}</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Opponent Live Status Bar */}
-      {oppName && (
-        <div style={{
-          background: 'rgba(20, 27, 42, 0.8)',
-          padding: '0.4rem 1.5rem',
-          borderBottom: '1px solid var(--border-subtle)',
-          fontSize: '0.78rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          color: 'var(--text-muted)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
-            <span>Opponent status: <strong style={{ color: '#ffffff' }}>{opponentProgress.status === 'coding' ? 'Typing solution...' : opponentProgress.status === 'submitted' ? `Tested (${opponentProgress.testCasesPassed}/${opponentProgress.totalTestCases} passed)` : 'Observing challenge...'}</strong></span>
-          </div>
-
-          <div style={{ color: 'var(--text-dim)' }}>
-            WebSocket: {wsConnected ? <span style={{ color: '#34d399' }}>Live Realtime</span> : <span style={{ color: '#f59e0b' }}>Reconnecting...</span>}
-          </div>
+      {/* Phase Notification Banner */}
+      <div style={{
+        background: isThinkingPhase ? 'rgba(245, 158, 11, 0.12)' : 'rgba(16, 185, 129, 0.1)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        padding: '0.35rem 1.5rem',
+        fontSize: '0.78rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        color: isThinkingPhase ? '#fbbf24' : '#34d399'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          {isThinkingPhase ? <Brain size={14} /> : <Zap size={14} />}
+          <span>
+            {isThinkingPhase 
+              ? 'Strategy / Thinking Phase (5 min): Read requirements & plan time complexity. Coding phase automatically kicks in after.' 
+              : `Coding Battle Active: ${battle.problem_details?.difficulty || 'EASY'} duration allocated. First optimal solution wins!`}
+          </span>
         </div>
-      )}
+
+        {oppName && (
+          <div style={{ color: 'var(--text-muted)' }}>
+            Opponent status: <strong style={{ color: '#ffffff' }}>{opponentProgress.status === 'coding' ? 'Typing solution...' : opponentProgress.status === 'submitted' ? `Tested (${opponentProgress.testCasesPassed}/${opponentProgress.totalTestCases} passed)` : 'Observing challenge...'}</strong>
+          </div>
+        )}
+      </div>
 
       {/* Main Dual Pane Arena */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', flex: 1, overflow: 'hidden' }}>
-        {/* Left: Problem details */}
+        {/* Left: Problem details & Sample Tests (Hidden tests kept secure on server) */}
         <div style={{ overflowY: 'auto', padding: '1.5rem', borderRight: '1px solid var(--border-subtle)' }}>
           <div style={{ marginBottom: '1.25rem' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.4rem' }}>
-              {battle.problem_details?.title}
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.4rem' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 800 }}>
+                {battle.problem_details?.title}
+              </h2>
+              <span className={`badge ${battle.problem_details?.difficulty === 'EASY' ? 'badge-easy' : battle.problem_details?.difficulty === 'HARD' ? 'badge-hard' : 'badge-medium'}`}>
+                {battle.problem_details?.difficulty}
+              </span>
+            </div>
             <div style={{ color: '#cbd5e1', lineHeight: 1.6, fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
               {battle.problem_details?.description}
             </div>
@@ -369,7 +389,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
           {battle.problem_details?.constraints && (
             <div style={{ marginBottom: '1.25rem' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.35rem', textTransform: 'uppercase' }}>
-                Constraints
+                Constraints & Complexity
               </div>
               <pre style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: '6px', fontSize: '0.8rem', color: 'var(--accent-amber)', fontFamily: 'var(--font-code)' }}>
                 {battle.problem_details.constraints}
@@ -380,7 +400,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
           {battle.problem_details?.sample_tests && (
             <div>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
-                Sample Tests
+                Sample Tests ({battle.problem_details.sample_tests.length} Visible, Hidden Evaluated on Server)
               </div>
               {battle.problem_details.sample_tests.map((st, i) => (
                 <div key={st.id} style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: '6px', marginBottom: '0.65rem' }}>
@@ -422,29 +442,36 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
                 Your Verdict:
               </span>
               {submissionResult && (
-                <span style={{
-                  color: submissionResult.verdict === 'ACCEPTED' ? '#34d399' : '#f87171',
-                  fontWeight: 700
-                }}>
-                  {submissionResult.verdict} ({submissionResult.test_cases_passed}/{submissionResult.total_test_cases})
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <span style={{
+                    color: submissionResult.verdict === 'ACCEPTED' ? '#34d399' : '#f87171',
+                    fontWeight: 700
+                  }}>
+                    {submissionResult.verdict} ({submissionResult.test_cases_passed}/{submissionResult.total_test_cases})
+                  </span>
+                  {submissionResult.execution_time_ms !== undefined && (
+                    <span style={{ color: 'var(--accent-cyan)', fontSize: '0.78rem' }}>
+                      ⚡ {submissionResult.execution_time_ms} ms
+                    </span>
+                  )}
+                </div>
               )}
             </div>
 
             {submissionResult ? (
               <div style={{ color: submissionResult.verdict === 'ACCEPTED' ? '#86efac' : '#fca5a5', whiteSpace: 'pre-wrap' }}>
-                {submissionResult.error_output || (submissionResult.verdict === 'ACCEPTED' ? 'Solution accepted! All tests cleared!' : '')}
+                {submissionResult.error_output || (submissionResult.verdict === 'ACCEPTED' ? 'Solution accepted! All sample and hidden test cases cleared!' : '')}
               </div>
             ) : (
               <div style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>
-                Submit when ready. The fastest accepted solution takes the match!
+                Write optimal algorithm and submit. Both sample and hidden test cases will be validated!
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Duel Completed Modal */}
+      {/* Duel Completed Modal with Complexity points breakdown */}
       {isCompleted && (
         <div style={{
           position: 'fixed',
@@ -458,7 +485,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
           padding: '1.5rem'
         }}>
           <div className="glass-panel" style={{
-            maxWidth: '480px',
+            maxWidth: '520px',
             width: '100%',
             padding: '2.5rem',
             textAlign: 'center',
@@ -486,7 +513,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
               {isWinner ? (
                 <>
-                  Congratulations! You solved <strong style={{ color: '#ffffff' }}>{battle.problem_details?.title}</strong> first.
+                  You cleared all test cases for <strong style={{ color: '#ffffff' }}>{battle.problem_details?.title}</strong> first with high time-complexity efficiency!
                 </>
               ) : (
                 <>
@@ -499,7 +526,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
               background: 'rgba(255, 255, 255, 0.04)',
               border: '1px solid var(--border-subtle)',
               borderRadius: 'var(--radius-sm)',
-              padding: '1rem',
+              padding: '1.25rem',
               marginBottom: '1.5rem',
               display: 'flex',
               alignItems: 'center',
@@ -507,15 +534,28 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
             }}>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Rating Adjustment</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: isWinner ? '#34d399' : '#f87171' }}>
-                  {isWinner ? '+25 pts' : '-15 pts'}
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: isWinner ? '#34d399' : '#f87171' }}>
+                  {isWinner ? `+${battle.winner_points_gained || 35} pts` : '-15 pts'}
                 </div>
               </div>
-              <div style={{ width: '1px', height: '32px', background: 'var(--border-subtle)' }} />
+              
+              {isWinner && battle.complexity_bonus > 0 && (
+                <>
+                  <div style={{ width: '1px', height: '36px', background: 'var(--border-subtle)' }} />
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Time Complexity Bonus</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#00f2fe' }}>
+                      +{battle.complexity_bonus} pts
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div style={{ width: '1px', height: '36px', background: 'var(--border-subtle)' }} />
               <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Battle Status</div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>
-                  COMPLETED
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Difficulty</div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fbbf24' }}>
+                  {battle.problem_details?.difficulty}
                 </div>
               </div>
             </div>

@@ -107,38 +107,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           </p>
         </div>
 
-        {/* Demo Fast Login Buttons */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.03)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '0.75rem',
-          marginBottom: '1.25rem'
-        }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '0.05em' }}>
-            Quick 1-Click Demo Login:
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-            <button 
-              type="button"
-              disabled={loading}
-              onClick={() => handleDemoLogin('algo_master')}
-              className="secondary-btn"
-              style={{ fontSize: '0.8rem', justifyContent: 'center', padding: '0.45rem' }}
-            >
-              algo_master (1580)
-            </button>
-            <button 
-              type="button"
-              disabled={loading}
-              onClick={() => handleDemoLogin('py_ninja')}
-              className="secondary-btn"
-              style={{ fontSize: '0.8rem', justifyContent: 'center', padding: '0.45rem' }}
-            >
-              py_ninja (1420)
-            </button>
-          </div>
-        </div>
 
         {error && (
           <div style={{

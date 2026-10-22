@@ -17,7 +17,9 @@ class BattleSerializer(serializers.ModelSerializer):
             'id', 'room_code', 'problem', 'problem_details',
             'player1', 'player1_name', 'player1_rating', 'player1_ready', 'player1_solved_at',
             'player2', 'player2_name', 'player2_rating', 'player2_ready', 'player2_solved_at',
-            'status', 'winner', 'winner_name', 'start_time', 'end_time', 'duration_seconds',
+            'status', 'winner', 'winner_name', 'start_time', 'end_time',
+            'thinking_seconds', 'coding_seconds', 'duration_seconds',
+            'winner_points_gained', 'complexity_bonus',
             'created_at'
         ]
-        read_only_fields = ['room_code', 'player1', 'status', 'winner', 'player1_solved_at', 'player2_solved_at', 'start_time', 'end_time']
+        read_only_fields = ['room_code', 'player1', 'status', 'winner', 'player1_solved_at', 'player2_solved_at', 'start_time', 'end_time', 'winner_points_gained', 'complexity_bonus']
