@@ -33,7 +33,7 @@ class ProblemDetailSerializer(serializers.ModelSerializer):
             'id', 'title', 'slug', 'difficulty', 'description',
             'input_format', 'output_format', 'constraints',
             'time_limit_sec', 'memory_limit_mb',
-            'starter_code_python', 'starter_code_cpp', 'starter_code_javascript',
+            'starter_code_python', 'starter_code_cpp', 'starter_code_java', 'starter_code_c', 'starter_code_javascript',
             'sample_tests'
         ]
 

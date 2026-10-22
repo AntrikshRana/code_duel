@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sparkles, User, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { X, Sparkles, User, Lock, Mail, ArrowRight, LogIn, UserPlus } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
@@ -17,32 +17,25 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     setError('');
     setLoading(true);
 
+    const cleanUsername = username.trim();
+    const cleanPassword = password.trim();
+
     try {
       if (isRegister) {
-        await api.register(username, email, password);
+        await api.register(cleanUsername, email.trim(), cleanPassword);
       } else {
-        await api.login(username, password);
+        await api.login(cleanUsername, cleanPassword);
       }
       const me = await api.getMe();
       onAuthSuccess(me);
       onClose();
     } catch (err) {
-      setError(err.message || 'Authentication failed. Please verify credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async (demoUsername) => {
-    setError('');
-    setLoading(true);
-    try {
-      await api.login(demoUsername, 'password123');
-      const me = await api.getMe();
-      onAuthSuccess(me);
-      onClose();
-    } catch (err) {
-      setError('Failed to log in as demo user.');
+      const msg = err.message || '';
+      if (msg.toLowerCase().includes('no active account')) {
+        setError('No account found with this username. Click "Create Account" tab above to register first!');
+      } else {
+        setError(msg || 'Authentication failed. Please verify username and password.');
+      }
     } finally {
       setLoading(false);
     }
@@ -84,39 +77,84 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           <X size={20} />
         </button>
 
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, #00f2fe, #4facfe)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '0.75rem',
-            boxShadow: 'var(--shadow-glow-cyan)'
-          }}>
-            <Sparkles size={24} color="#07090e" />
-          </div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 800 }}>
-            {isRegister ? 'Join Code Duel' : 'Welcome Back, Gladiator'}
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-            {isRegister ? 'Create an account to battle in real-time.' : 'Sign in to access 1v1 arenas and your ratings.'}
-          </p>
+        {/* Tab Switcher at Top */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '0.5rem',
+          background: 'rgba(255, 255, 255, 0.04)',
+          padding: '0.3rem',
+          borderRadius: 'var(--radius-sm)',
+          border: '1px solid var(--border-subtle)',
+          marginBottom: '1.5rem'
+        }}>
+          <button
+            type="button"
+            onClick={() => { setIsRegister(false); setError(''); }}
+            style={{
+              background: !isRegister ? 'var(--grad-primary)' : 'transparent',
+              color: !isRegister ? '#07090e' : 'var(--text-muted)',
+              border: 'none',
+              padding: '0.55rem',
+              borderRadius: '6px',
+              fontWeight: 800,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <LogIn size={15} />
+            <span>Sign In</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setIsRegister(true); setError(''); }}
+            style={{
+              background: isRegister ? 'var(--grad-primary)' : 'transparent',
+              color: isRegister ? '#07090e' : 'var(--text-muted)',
+              border: 'none',
+              padding: '0.55rem',
+              borderRadius: '6px',
+              fontWeight: 800,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <UserPlus size={15} />
+            <span>Create Account</span>
+          </button>
         </div>
 
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 800 }}>
+            {isRegister ? 'Create Your Gladiator Profile' : 'Welcome Back, Gladiator'}
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+            {isRegister ? 'Register your username to start tracking ratings and 1v1 battles.' : 'Enter your credentials to access the 1v1 arena.'}
+          </p>
+        </div>
 
         {error && (
           <div style={{
             background: 'rgba(244, 63, 94, 0.15)',
             border: '1px solid rgba(244, 63, 94, 0.4)',
             color: '#f87171',
-            padding: '0.65rem 0.9rem',
+            padding: '0.75rem 0.9rem',
             borderRadius: 'var(--radius-sm)',
             fontSize: '0.82rem',
-            marginBottom: '1rem'
+            marginBottom: '1.25rem',
+            lineHeight: 1.4
           }}>
             {error}
           </div>
@@ -135,7 +173,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="e.g. speed_coder"
+                placeholder="e.g. gaurav"
                 style={{
                   width: '100%',
                   background: 'rgba(13, 17, 26, 0.8)',
@@ -179,7 +217,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
           <div>
             <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 600 }}>
-              Password
+              Password (min 6 characters)
             </label>
             <div style={{ position: 'relative' }}>
               <Lock size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)' }} />
@@ -209,37 +247,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             className="glow-btn"
             style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}
           >
-            <span>{loading ? 'Processing...' : (isRegister ? 'Create Gladiator Account' : 'Sign In')}</span>
+            <span>{loading ? 'Processing...' : (isRegister ? 'Register & Enter Arena' : 'Sign In')}</span>
             <ArrowRight size={16} />
           </button>
         </form>
-
-        {/* Toggle between register and login */}
-        <div style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          {isRegister ? (
-            <>
-              Already have an account?{' '}
-              <button 
-                type="button"
-                onClick={() => { setIsRegister(false); setError(''); }}
-                style={{ background: 'transparent', border: 'none', color: '#00f2fe', fontWeight: 600, cursor: 'pointer' }}
-              >
-                Sign In
-              </button>
-            </>
-          ) : (
-            <>
-              Don't have an account?{' '}
-              <button 
-                type="button"
-                onClick={() => { setIsRegister(true); setError(''); }}
-                style={{ background: 'transparent', border: 'none', color: '#00f2fe', fontWeight: 600, cursor: 'pointer' }}
-              >
-                Create One
-              </button>
-            </>
-          )}
-        </div>
       </div>
     </div>
   );

@@ -32,9 +32,11 @@ export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
 
   const updateStarterCode = (prob, lang) => {
     if (!prob) return;
-    if (lang === 'python') setCode(prob.starter_code_python);
-    else if (lang === 'cpp') setCode(prob.starter_code_cpp);
-    else if (lang === 'javascript') setCode(prob.starter_code_javascript);
+    if (lang === 'python') setCode(prob.starter_code_python || '# Write solution\n');
+    else if (lang === 'cpp') setCode(prob.starter_code_cpp || '#include <iostream>\nusing namespace std;\nint main() { return 0; }\n');
+    else if (lang === 'java') setCode(prob.starter_code_java || 'import java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n    }\n}\n');
+    else if (lang === 'c') setCode(prob.starter_code_c || '#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    return 0;\n}\n');
+    else if (lang === 'javascript') setCode(prob.starter_code_javascript || 'const fs = require("fs");\n');
   };
 
   const handleLanguageChange = (newLang) => {
@@ -134,6 +136,8 @@ export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
             >
               <option value="python" style={{ background: '#141b2a' }}>Python 3</option>
               <option value="cpp" style={{ background: '#141b2a' }}>C++ 17</option>
+              <option value="java" style={{ background: '#141b2a' }}>Java (OpenJDK)</option>
+              <option value="c" style={{ background: '#141b2a' }}>C (GCC)</option>
               <option value="javascript" style={{ background: '#141b2a' }}>JavaScript (Node)</option>
             </select>
           </div>
@@ -254,7 +258,7 @@ export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
             <Editor
               height="100%"
               theme="vs-dark"
-              language={language === 'cpp' ? 'cpp' : language === 'javascript' ? 'javascript' : 'python'}
+              language={language === 'cpp' || language === 'c' ? 'cpp' : language === 'java' ? 'java' : language === 'javascript' ? 'javascript' : 'python'}
               value={code}
               onChange={(val) => setCode(val || '')}
               options={{

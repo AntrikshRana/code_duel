@@ -61,6 +61,16 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
     };
   }, [battle?.status]);
 
+  const updateStarterCode = (data, lang) => {
+    if (!data?.problem_details) return;
+    const p = data.problem_details;
+    if (lang === 'python') setCode(p.starter_code_python || '# Write solution\n');
+    else if (lang === 'cpp') setCode(p.starter_code_cpp || '#include <iostream>\nusing namespace std;\nint main() { return 0; }\n');
+    else if (lang === 'java') setCode(p.starter_code_java || 'import java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n    }\n}\n');
+    else if (lang === 'c') setCode(p.starter_code_c || '#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    return 0;\n}\n');
+    else if (lang === 'javascript') setCode(p.starter_code_javascript || 'const fs = require("fs");\n');
+  };
+
   const fetchBattleData = async () => {
     try {
       const data = await api.getBattle(roomCode);
@@ -69,9 +79,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
         setTimeLeft(data.duration_seconds);
       }
       if (data.problem_details) {
-        if (language === 'python') setCode(data.problem_details.starter_code_python);
-        else if (language === 'cpp') setCode(data.problem_details.starter_code_cpp);
-        else if (language === 'javascript') setCode(data.problem_details.starter_code_javascript);
+        updateStarterCode(data, language);
       }
       if (data.status === 'COMPLETED' && data.winner_name === user?.username) {
         triggerVictoryConfetti();
@@ -415,12 +423,62 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
 
         {/* Right: Monaco Editor + Output Drawer */}
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+          {/* Language Selector Bar */}
+          <div style={{
+            padding: '0.45rem 1rem',
+            background: 'rgba(13, 17, 26, 0.9)',
+            borderBottom: '1px solid var(--border-subtle)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                Language:
+              </span>
+              <select
+                value={language}
+                onChange={(e) => {
+                  const newLang = e.target.value;
+                  setLanguage(newLang);
+                  updateStarterCode(battle, newLang);
+                }}
+                style={{
+                  background: '#141b2a',
+                  color: 'var(--text-main)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '4px',
+                  padding: '0.2rem 0.5rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="python">Python 3</option>
+                <option value="cpp">C++ 17</option>
+                <option value="java">Java (OpenJDK)</option>
+                <option value="c">C (GCC)</option>
+                <option value="javascript">JavaScript (Node)</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => updateStarterCode(battle, language)}
+              className="secondary-btn"
+              title="Reset starter template"
+              style={{ padding: '0.2rem 0.5rem', fontSize: '0.72rem' }}
+            >
+              Reset Template
+            </button>
+          </div>
+
           {/* Editor */}
           <div style={{ flex: 1, position: 'relative' }}>
             <Editor
               height="100%"
               theme="vs-dark"
-              language={language === 'cpp' ? 'cpp' : language === 'javascript' ? 'javascript' : 'python'}
+              language={language === 'cpp' || language === 'c' ? 'cpp' : language === 'java' ? 'java' : language === 'javascript' ? 'javascript' : 'python'}
               value={code}
               onChange={handleEditorChange}
               options={{

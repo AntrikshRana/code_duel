@@ -21,6 +21,8 @@ class Problem(models.Model):
     
     starter_code_python = models.TextField(default='def solve():\n    # Write your solution here\n    pass\n\nif __name__ == "__main__":\n    solve()\n')
     starter_code_cpp = models.TextField(default='#include <iostream>\nusing namespace std;\n\nint main() {\n    // Write your solution here\n    return 0;\n}\n')
+    starter_code_java = models.TextField(default='import java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // Write your solution here\n    }\n}\n')
+    starter_code_c = models.TextField(default='#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n    // Write your solution here\n    return 0;\n}\n')
     starter_code_javascript = models.TextField(default='const fs = require("fs");\n\nfunction solve() {\n    // Write your solution here\n}\n\nsolve();\n')
 
     created_at = models.DateTimeField(auto_now_add=True)

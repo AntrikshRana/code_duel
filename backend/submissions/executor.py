@@ -122,6 +122,55 @@ def run_isolated_code(language, code, input_data, time_limit_sec=2.0):
                 run_proc.kill()
                 return {"verdict": "TIME_LIMIT_EXCEEDED", "output": "", "error": "Execution timed out", "time_ms": int(time_limit_sec * 1000)}
 
+        elif language == 'c':
+            c_path = os.path.join(temp_dir, "solution.c")
+            exe_path = os.path.join(temp_dir, "solution.exe" if os.name == 'nt' else "solution")
+            with open(c_path, "w", encoding="utf-8") as f:
+                f.write(code)
+
+            compile_cmd = ["gcc", "-O2", c_path, "-o", exe_path]
+            try:
+                compile_proc = subprocess.run(compile_cmd, capture_output=True, text=True, timeout=10)
+                if compile_proc.returncode != 0:
+                    return {"verdict": "COMPILATION_ERROR", "output": "", "error": compile_proc.stderr, "time_ms": 0}
+            except FileNotFoundError:
+                return {"verdict": "RUNTIME_ERROR", "output": "", "error": "C compiler (gcc) not available.", "time_ms": 0}
+
+            run_proc = subprocess.Popen([exe_path], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=temp_dir)
+            try:
+                stdout, stderr = run_proc.communicate(input=input_data, timeout=time_limit_sec)
+                exec_time_ms = round((time.time() - start_time) * 1000, 2)
+                if run_proc.returncode != 0:
+                    return {"verdict": "RUNTIME_ERROR", "output": stdout, "error": stderr, "time_ms": exec_time_ms}
+                return {"verdict": "SUCCESS", "output": stdout, "error": stderr, "time_ms": exec_time_ms}
+            except subprocess.TimeoutExpired:
+                run_proc.kill()
+                return {"verdict": "TIME_LIMIT_EXCEEDED", "output": "", "error": "Execution timed out", "time_ms": int(time_limit_sec * 1000)}
+
+        elif language == 'java':
+            java_path = os.path.join(temp_dir, "Solution.java")
+            with open(java_path, "w", encoding="utf-8") as f:
+                f.write(code)
+
+            compile_cmd = ["javac", java_path]
+            try:
+                compile_proc = subprocess.run(compile_cmd, capture_output=True, text=True, timeout=12)
+                if compile_proc.returncode != 0:
+                    return {"verdict": "COMPILATION_ERROR", "output": "", "error": compile_proc.stderr, "time_ms": 0}
+            except FileNotFoundError:
+                return {"verdict": "RUNTIME_ERROR", "output": "", "error": "Java compiler (javac) not available.", "time_ms": 0}
+
+            run_proc = subprocess.Popen(["java", "Solution"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=temp_dir)
+            try:
+                stdout, stderr = run_proc.communicate(input=input_data, timeout=time_limit_sec + 1.0)
+                exec_time_ms = round((time.time() - start_time) * 1000, 2)
+                if run_proc.returncode != 0:
+                    return {"verdict": "RUNTIME_ERROR", "output": stdout, "error": stderr, "time_ms": exec_time_ms}
+                return {"verdict": "SUCCESS", "output": stdout, "error": stderr, "time_ms": exec_time_ms}
+            except subprocess.TimeoutExpired:
+                run_proc.kill()
+                return {"verdict": "TIME_LIMIT_EXCEEDED", "output": "", "error": "Execution timed out", "time_ms": int((time_limit_sec + 1.0) * 1000)}
+
         else:
             return {"verdict": "COMPILATION_ERROR", "output": "", "error": f"Unsupported language: {language}", "time_ms": 0}
 
