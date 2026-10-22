@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: codeduel-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: "bash build.sh"
+    startCommand: "daphne -b 0.0.0.0 -p $PORT codeduel.asgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: DEBUG
+        value: "True"
