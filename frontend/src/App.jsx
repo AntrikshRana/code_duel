@@ -20,7 +20,10 @@ export default function App() {
     const token = localStorage.getItem('codeduel_token');
     if (token) {
       api.getMe()
-        .then(u => setUser(u))
+        .then(u => {
+          setUser(u);
+          setCurrentUserStored(u);
+        })
         .catch(() => {
           removeAuthToken();
           setUser(null);

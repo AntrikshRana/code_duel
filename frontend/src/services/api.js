@@ -8,7 +8,12 @@ export const removeAuthToken = () => localStorage.removeItem('codeduel_token');
 export const getCurrentUserStored = () => {
   try {
     const u = localStorage.getItem('codeduel_user');
-    return u ? JSON.parse(u) : null;
+    if (!u) return null;
+    const parsed = JSON.parse(u);
+    if (parsed && parsed.profile && parsed.profile.rating === 1200) {
+      parsed.profile.rating = 0;
+    }
+    return parsed;
   } catch (e) {
     return null;
   }
