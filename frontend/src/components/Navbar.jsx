@@ -133,10 +133,31 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
                   <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user.username}</span>
-                  <span style={{ fontSize: '0.7rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-                    <Flame size={12} fill="#fbbf24" />
-                    {user.profile?.rating ?? 0} pts
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '1px' }}>
+                    <span style={{ fontSize: '0.7rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                      <Flame size={12} fill="#fbbf24" />
+                      {user.profile?.rating ?? 0} pts
+                    </span>
+                    {(user.profile?.current_streak ?? 0) > 0 && (
+                      <span 
+                        title={`Current Win Streak: ${user.profile.current_streak}`}
+                        style={{ 
+                          fontSize: '0.65rem', 
+                          fontWeight: 700, 
+                          color: '#f87171', 
+                          background: 'rgba(239, 68, 68, 0.2)', 
+                          border: '1px solid rgba(239, 68, 68, 0.4)',
+                          padding: '0.05rem 0.35rem', 
+                          borderRadius: '4px',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px'
+                        }}
+                      >
+                        🔥 {user.profile.current_streak}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 

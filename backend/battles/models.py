@@ -40,7 +40,8 @@ class Battle(models.Model):
     coding_seconds = models.PositiveIntegerField(default=900)
     duration_seconds = models.PositiveIntegerField(default=1200)
 
-    # Points earned breakdown
+    # Points earned breakdown (Only ranked matches change rating points)
+    is_ranked = models.BooleanField(default=False)
     winner_points_gained = models.IntegerField(default=0)
     complexity_bonus = models.IntegerField(default=0)
     

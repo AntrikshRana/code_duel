@@ -59,7 +59,7 @@ export default function Leaderboard() {
         <div className="glass-panel" style={{ overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: '80px 1fr 140px 140px 120px',
+            gridTemplateColumns: '70px 1fr 120px 100px 110px 100px',
             padding: '1rem 1.5rem',
             background: 'var(--bg-dark)',
             borderBottom: '1px solid var(--border-subtle)',
@@ -72,6 +72,7 @@ export default function Leaderboard() {
             <div>Rank</div>
             <div>Gladiator</div>
             <div style={{ textAlign: 'center' }}>Rating</div>
+            <div style={{ textAlign: 'center' }}>Streak</div>
             <div style={{ textAlign: 'center' }}>Win Rate</div>
             <div style={{ textAlign: 'right' }}>W / L</div>
           </div>
@@ -87,7 +88,7 @@ export default function Leaderboard() {
                   key={p.username}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '80px 1fr 140px 140px 120px',
+                    gridTemplateColumns: '70px 1fr 120px 100px 110px 100px',
                     padding: '1.1rem 1.5rem',
                     alignItems: 'center',
                     borderBottom: index < leaders.length - 1 ? '1px solid rgba(255, 255, 255, 0.04)' : 'none',
@@ -150,6 +151,28 @@ export default function Leaderboard() {
                       <Flame size={15} fill="#fbbf24" />
                       {p.rating}
                     </span>
+                  </div>
+
+                  {/* Streak */}
+                  <div style={{ textAlign: 'center' }}>
+                    {(p.current_streak || 0) > 0 ? (
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.2rem',
+                        background: 'rgba(239, 68, 68, 0.15)',
+                        border: '1px solid rgba(239, 68, 68, 0.35)',
+                        color: '#f87171',
+                        fontSize: '0.78rem',
+                        fontWeight: 800,
+                        padding: '0.15rem 0.5rem',
+                        borderRadius: '100px'
+                      }}>
+                        🔥 {p.current_streak}
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--text-dim)', fontSize: '0.8rem' }}>-</span>
+                    )}
                   </div>
 
                   {/* Win Rate */}

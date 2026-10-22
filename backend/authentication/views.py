@@ -43,6 +43,8 @@ class LeaderboardView(APIView):
             {
                 "username": p.user.username,
                 "rating": p.rating,
+                "current_streak": getattr(p, 'current_streak', 0),
+                "max_streak": getattr(p, 'max_streak', 0),
                 "wins": p.wins,
                 "losses": p.losses,
                 "draws": p.draws,

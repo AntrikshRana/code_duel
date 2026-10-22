@@ -9,6 +9,8 @@ class UserProfile(models.Model):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     draws = models.IntegerField(default=0)
+    current_streak = models.IntegerField(default=0)
+    max_streak = models.IntegerField(default=0)
     avatar_url = models.CharField(max_length=255, blank=True, default='')
     bio = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)

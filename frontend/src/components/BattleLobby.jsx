@@ -251,26 +251,36 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
           </div>
 
           {/* Action Row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <button 
-              onClick={startMatchmaking}
-              disabled={isSearching}
-              className="battle-btn"
-              style={{ fontSize: '1rem', padding: '0.85rem 1.85rem' }}
-            >
-              <Swords size={20} />
-              <span>Enter Matchmaking Queue</span>
-            </button>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1.25rem', flexWrap: 'wrap' }}>
+            <div>
+              <button 
+                onClick={startMatchmaking}
+                disabled={isSearching}
+                className="battle-btn"
+                style={{ fontSize: '1rem', padding: '0.85rem 1.85rem' }}
+              >
+                <Swords size={20} />
+                <span>Enter Matchmaking Queue</span>
+              </button>
+              <div style={{ fontSize: '0.72rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.45rem', fontWeight: 600 }}>
+                🔥 Ranked Mode: Awards Rating Points & Win Streaks
+              </div>
+            </div>
 
-            <button 
-              onClick={handleCreateRoom}
-              disabled={isSearching || actionLoading}
-              className="secondary-btn"
-              style={{ fontSize: '0.95rem', padding: '0.85rem 1.4rem' }}
-            >
-              <Plus size={18} />
-              <span>Create Private Room</span>
-            </button>
+            <div>
+              <button 
+                onClick={handleCreateRoom}
+                disabled={isSearching || actionLoading}
+                className="secondary-btn"
+                style={{ fontSize: '0.95rem', padding: '0.85rem 1.4rem' }}
+              >
+                <Plus size={18} />
+                <span>Create Custom Room</span>
+              </button>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.45rem', fontWeight: 500 }}>
+                🎮 Casual Practice: Unrated (No points earned)
+              </div>
+            </div>
           </div>
 
           {joinError && (
@@ -391,13 +401,22 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
                         <span className={`badge ${b.problem_details?.difficulty === 'EASY' ? 'badge-easy' : b.problem_details?.difficulty === 'HARD' ? 'badge-hard' : 'badge-medium'}`}>
                           {b.problem_details?.difficulty || 'EASY'}
                         </span>
+                        {b.is_ranked ? (
+                          <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f87171', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                            ⚔️ RANKED
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '0.65rem', fontWeight: 600, color: '#94a3b8', background: 'rgba(148, 163, 184, 0.15)', border: '1px solid rgba(148, 163, 184, 0.25)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                            🎮 CASUAL
+                          </span>
+                        )}
                       </div>
 
                       <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{b.player1_name}</span> ({b.player1_rating} pts)
+                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{b.player1_name}</span> ({b.player1_rating} pts {b.player1_streak > 0 ? `🔥${b.player1_streak}` : ''})
                         <span style={{ color: 'var(--text-dim)' }}>vs</span>
                         <span style={{ color: b.player2_name ? '#ffffff' : 'var(--accent-amber)', fontWeight: 600 }}>
-                          {b.player2_name ? `${b.player2_name} (${b.player2_rating} pts)` : 'Waiting for opponent...'}
+                          {b.player2_name ? `${b.player2_name} (${b.player2_rating} pts ${b.player2_streak > 0 ? `🔥${b.player2_streak}` : ''})` : 'Waiting for opponent...'}
                         </span>
                       </div>
                     </div>

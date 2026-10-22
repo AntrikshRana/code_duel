@@ -278,23 +278,40 @@ def execute_submission(submission):
             else:
                 comp_bonus = 4
 
-            total_gain = base_points + comp_bonus
-            battle.winner_points_gained = total_gain
-            battle.complexity_bonus = comp_bonus
-
-            # Update user ratings
             winner_prof = submission.user.profile
-            winner_prof.rating += total_gain
-            winner_prof.wins += 1
-            winner_prof.save()
-
             opponent = battle.player2 if is_p1 else battle.player1
-            if opponent:
-                opp_prof = opponent.profile
-                penalty = 12 if diff == 'EASY' else (18 if diff == 'MEDIUM' else 24)
-                opp_prof.rating = max(0, opp_prof.rating - penalty)
-                opp_prof.losses += 1
-                opp_prof.save()
+            opp_prof = opponent.profile if opponent else None
+
+            # Only ranked matches (from Matchmaking) award rating points & update win streak
+            # Custom rooms are unrated practice rooms (points do not increase)
+            if battle.is_ranked:
+                battle.winner_points_gained = total_gain
+                battle.complexity_bonus = comp_bonus
+
+                # Winner rating & streak update
+                winner_prof.rating += total_gain
+                winner_prof.wins += 1
+                winner_prof.current_streak += 1
+                if winner_prof.current_streak > winner_prof.max_streak:
+                    winner_prof.max_streak = winner_prof.current_streak
+                winner_prof.save()
+
+                # Opponent rating penalty & streak reset
+                if opp_prof:
+                    penalty = 12 if diff == 'EASY' else (18 if diff == 'MEDIUM' else 24)
+                    opp_prof.rating = max(0, opp_prof.rating - penalty)
+                    opp_prof.losses += 1
+                    opp_prof.current_streak = 0
+                    opp_prof.save()
+            else:
+                # Custom Room: Casual Practice (No rating points earned)
+                battle.winner_points_gained = 0
+                battle.complexity_bonus = 0
+                winner_prof.wins += 1
+                winner_prof.save()
+                if opp_prof:
+                    opp_prof.losses += 1
+                    opp_prof.save()
 
         battle.save()
 

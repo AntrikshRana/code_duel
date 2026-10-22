@@ -189,8 +189,10 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
   const isPlayer1 = user?.username === battle.player1_name;
   const isPlayer2 = user?.username === battle.player2_name;
   const myRating = isPlayer1 ? battle.player1_rating : battle.player2_rating;
+  const myStreak = isPlayer1 ? battle.player1_streak : battle.player2_streak;
   const oppName = isPlayer1 ? battle.player2_name : battle.player1_name;
   const oppRating = isPlayer1 ? battle.player2_rating : battle.player1_rating;
+  const oppStreak = isPlayer1 ? battle.player2_streak : battle.player1_streak;
 
   // Thinking Phase (first 5 min) vs Coding Phase
   const codingDuration = battle.coding_seconds || 900;
@@ -244,6 +246,34 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
             <span style={{ color: 'var(--accent-cyan)', fontWeight: 700 }}>#{roomCode}</span>
             {copiedCode ? <Check size={14} color="#34d399" /> : <Copy size={14} color="var(--text-dim)" />}
           </div>
+
+          {battle.is_ranked ? (
+            <span style={{ 
+              background: 'rgba(239, 68, 68, 0.15)', 
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              color: '#f87171',
+              padding: '0.2rem 0.65rem',
+              borderRadius: '100px',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              letterSpacing: '0.5px'
+            }}>
+              ⚔️ RANKED MATCH (ELO RATED)
+            </span>
+          ) : (
+            <span style={{ 
+              background: 'rgba(148, 163, 184, 0.15)', 
+              border: '1px solid rgba(148, 163, 184, 0.3)',
+              color: '#94a3b8',
+              padding: '0.2rem 0.65rem',
+              borderRadius: '100px',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              letterSpacing: '0.5px'
+            }}>
+              🎮 CUSTOM ROOM (UNRATED - NO POINTS)
+            </span>
+          )}
         </div>
 
         {/* Center: 1v1 Matchup Head-to-Head + Phase Timer */}
@@ -254,8 +284,9 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
               <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#38bdf8' }}>
                 {user?.username || 'You'} (You)
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                {myRating ?? 0} pts
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.35rem' }}>
+                <span>{myRating ?? 0} pts</span>
+                {(myStreak ?? 0) > 0 && <span style={{ color: '#f87171', fontWeight: 700 }}>🔥{myStreak}</span>}
               </div>
             </div>
             <div style={{
@@ -319,8 +350,9 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
               <div style={{ fontSize: '0.85rem', fontWeight: 700, color: oppName ? '#f43f5e' : 'var(--accent-amber)' }}>
                 {oppName || 'Waiting for Challenger...'}
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                {oppName ? `${oppRating ?? 0} pts` : 'Share room code to invite'}
+              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span>{oppName ? `${oppRating ?? 0} pts` : 'Share room code to invite'}</span>
+                {oppName && (oppStreak ?? 0) > 0 && <span style={{ color: '#f87171', fontWeight: 700 }}>🔥{oppStreak}</span>}
               </div>
             </div>
           </div>
@@ -592,18 +624,34 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
             }}>
               <div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Rating Adjustment</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: isWinner ? '#34d399' : '#f87171' }}>
-                  {isWinner ? `+${battle.winner_points_gained || 35} pts` : '-15 pts'}
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: battle.is_ranked ? (isWinner ? '#34d399' : '#f87171') : '#94a3b8' }}>
+                  {battle.is_ranked ? (
+                    isWinner ? `+${battle.winner_points_gained || 35} pts` : '-15 pts'
+                  ) : (
+                    'Unrated (Custom Room)'
+                  )}
                 </div>
               </div>
               
-              {isWinner && battle.complexity_bonus > 0 && (
+              {battle.is_ranked && isWinner && battle.complexity_bonus > 0 && (
                 <>
                   <div style={{ width: '1px', height: '36px', background: 'var(--border-subtle)' }} />
                   <div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Time Complexity Bonus</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#00f2fe' }}>
                       +{battle.complexity_bonus} pts
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {battle.is_ranked && isWinner && (
+                <>
+                  <div style={{ width: '1px', height: '36px', background: 'var(--border-subtle)' }} />
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Win Streak</div>
+                    <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f87171' }}>
+                      🔥 {(myStreak ?? 0) + 1}
                     </div>
                   </div>
                 </>

@@ -24,7 +24,8 @@ class CreateBattleView(APIView):
         battle = Battle.objects.create(
             problem=problem,
             player1=request.user,
-            status='WAITING'
+            status='WAITING',
+            is_ranked=False
         )
         return Response(BattleSerializer(battle).data, status=status.HTTP_201_CREATED)
 
@@ -108,7 +109,8 @@ class JoinMatchmakingView(APIView):
                 player1=opponent_ticket.user,
                 player2=request.user,
                 status='COUNTDOWN',
-                start_time=timezone.now()
+                start_time=timezone.now(),
+                is_ranked=True
             )
 
             # Signal opponent ticket
