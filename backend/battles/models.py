@@ -75,7 +75,7 @@ class BattleEvent(models.Model):
 
 class MatchmakingQueue(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='matchmaking_ticket')
-    rating = models.IntegerField(default=1200)
+    rating = models.IntegerField(default=0)
     difficulty_preference = models.CharField(max_length=10, default='ANY')
     matched_room_code = models.CharField(max_length=10, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

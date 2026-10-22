@@ -135,7 +135,7 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
                   <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user.username}</span>
                   <span style={{ fontSize: '0.7rem', color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
                     <Flame size={12} fill="#fbbf24" />
-                    {user.profile?.rating || 1200} pts
+                    {user.profile?.rating ?? 0} pts
                   </span>
                 </div>
               </div>

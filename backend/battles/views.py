@@ -69,8 +69,8 @@ class JoinMatchmakingView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        my_rating = getattr(request.user.profile, 'rating', 1200)
-        diff_pref = request.data.get('difficulty', 'ANY')
+        my_rating = getattr(request.user.profile, 'rating', 0)
+        diff_pref = request.data.get('difficulty', 'ANY').upper()
 
         # Clean any stale entry for current user
         MatchmakingQueue.objects.filter(user=request.user).delete()
@@ -80,23 +80,26 @@ class JoinMatchmakingView(APIView):
             matched_room_code__isnull=True
         ).exclude(user=request.user)
 
-        opponent_ticket = None
-        # Try finding opponent within ±250 rating first
-        for candidate in queue_candidates:
-            if abs(candidate.rating - my_rating) <= 250:
-                opponent_ticket = candidate
-                break
+        # Filter by difficulty preference if specific tier requested
+        if diff_pref in ['EASY', 'MEDIUM', 'HARD']:
+            queue_candidates = queue_candidates.filter(
+                difficulty_preference__in=[diff_pref, 'ANY']
+            )
 
-        # Fallback to any waiting opponent
-        if not opponent_ticket and queue_candidates.exists():
-            opponent_ticket = queue_candidates.first()
+        opponent_ticket = None
+        candidates_list = list(queue_candidates.order_by('created_at'))
+        if candidates_list:
+            # Sort by closest rating to current player
+            candidates_list.sort(key=lambda c: abs(c.rating - my_rating))
+            opponent_ticket = candidates_list[0]
 
         if opponent_ticket:
-            # Match found! Pick problem
+            # Match found! Pick problem matching requested difficulty
+            target_diff = diff_pref if diff_pref in ['EASY', 'MEDIUM', 'HARD'] else opponent_ticket.difficulty_preference
             problems = Problem.objects.all()
-            if diff_pref != 'ANY':
-                matched_probs = problems.filter(difficulty=diff_pref)
-                problem = random.choice(list(matched_probs)) if matched_probs.exists() else random.choice(list(problems))
+            if target_diff in ['EASY', 'MEDIUM', 'HARD']:
+                matched_probs = list(problems.filter(difficulty=target_diff))
+                problem = random.choice(matched_probs) if matched_probs else random.choice(list(problems))
             else:
                 problem = random.choice(list(problems))
 

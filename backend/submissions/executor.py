@@ -243,7 +243,7 @@ def execute_submission(submission):
             if opponent:
                 opp_prof = opponent.profile
                 penalty = 12 if diff == 'EASY' else (18 if diff == 'MEDIUM' else 24)
-                opp_prof.rating = max(100, opp_prof.rating - penalty)
+                opp_prof.rating = max(0, opp_prof.rating - penalty)
                 opp_prof.losses += 1
                 opp_prof.save()
 

@@ -247,7 +247,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
                 {user?.username || 'You'} (You)
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                {myRating || 1200} pts
+                {myRating ?? 0} pts
               </div>
             </div>
             <div style={{
@@ -312,7 +312,7 @@ export default function BattleRoom({ roomCode, user, onLeave }) {
                 {oppName || 'Waiting for Challenger...'}
               </div>
               <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                {oppName ? `${oppRating || 1200} pts` : 'Share room code to invite'}
+                {oppName ? `${oppRating ?? 0} pts` : 'Share room code to invite'}
               </div>
             </div>
           </div>

@@ -151,9 +151,9 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
     }
   };
 
-  const myRating = user?.profile?.rating || 1200;
-  const ratingRangeMin = Math.max(100, myRating - 150 - Math.floor(searchSeconds / 5) * 50);
-  const ratingRangeMax = myRating + 150 + Math.floor(searchSeconds / 5) * 50;
+  const myRating = user?.profile?.rating ?? 0;
+  const ratingRangeMin = Math.max(0, myRating - 100 - Math.floor(searchSeconds / 5) * 50);
+  const ratingRangeMax = myRating + 100 + Math.floor(searchSeconds / 5) * 50;
 
   const searchMinutes = Math.floor(searchSeconds / 60);
   const searchSecs = searchSeconds % 60;
@@ -206,28 +206,48 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
             Queue up to be paired automatically with a coder of similar rating. 5-minute thinking phase, 15-35 min difficulty timers, and time-complexity bonus points!
           </p>
 
-          {/* Difficulty Preference Selector */}
-          <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Queue Preference:</span>
-            {['ANY', 'EASY', 'MEDIUM', 'HARD'].map(diff => (
-              <button
-                key={diff}
-                onClick={() => setDifficultyPref(diff)}
-                style={{
-                  background: difficultyPref === diff ? 'rgba(0, 242, 254, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  border: difficultyPref === diff ? '1px solid #00f2fe' : '1px solid var(--border-subtle)',
-                  color: difficultyPref === diff ? '#00f2fe' : 'var(--text-muted)',
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.78rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {diff === 'ANY' ? 'Any Challenge' : diff}
-              </button>
-            ))}
+          {/* Difficulty Tier Selector */}
+          <div style={{ marginBottom: '1.75rem' }}>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.65rem' }}>
+              Choose Matchmaking Difficulty Tier:
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem' }}>
+              {[
+                { id: 'ANY', label: 'Any Tier', time: 'Random', color: '#00f2fe' },
+                { id: 'EASY', label: 'Easy Tier', time: '15m Code', color: '#34d399' },
+                { id: 'MEDIUM', label: 'Medium Tier', time: '25m Code', color: '#fbbf24' },
+                { id: 'HARD', label: 'Hard Tier', time: '35m Code', color: '#f87171' }
+              ].map(tier => {
+                const isSelected = difficultyPref === tier.id;
+                return (
+                  <button
+                    key={tier.id}
+                    onClick={() => setDifficultyPref(tier.id)}
+                    type="button"
+                    style={{
+                      background: isSelected ? 'rgba(20, 27, 42, 0.95)' : 'rgba(255, 255, 255, 0.03)',
+                      border: isSelected ? `2px solid ${tier.color}` : '1px solid var(--border-subtle)',
+                      boxShadow: isSelected ? `0 0 15px ${tier.color}40` : 'none',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '0.65rem 0.75rem',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.2rem'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: isSelected ? tier.color : 'var(--text-main)' }}>
+                      {tier.label}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                      ⏱️ {tier.time}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Action Row */}
