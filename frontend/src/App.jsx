@@ -86,6 +86,7 @@ export default function App() {
             user={user}
             onEnterBattle={handleEnterBattle}
             onOpenAuth={() => setIsAuthModalOpen(true)}
+            onAuthSuccess={(userData) => setUser(userData)}
           />
         )}
 

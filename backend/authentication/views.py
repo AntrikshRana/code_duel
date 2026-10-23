@@ -27,6 +27,89 @@ class RegisterView(generics.CreateAPIView):
             }
         }, status=status.HTTP_201_CREATED)
 
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        raw_username = request.data.get('username', '')
+        password = request.data.get('password', '')
+
+        if not raw_username or not password:
+            return Response(
+                {"error": "Please enter both username/email and password."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        clean_username = raw_username.strip()
+
+        # Check if user exists (case-insensitive by username or email)
+        user = User.objects.filter(username__iexact=clean_username).first()
+        if not user:
+            user = User.objects.filter(email__iexact=clean_username).first()
+
+        if not user:
+            return Response(
+                {
+                    "error": f"No account found for '{clean_username}'. Would you like to create one?",
+                    "code": "USER_NOT_FOUND",
+                    "suggested_username": clean_username
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not user.check_password(password):
+            return Response(
+                {
+                    "error": "Incorrect password. Please double-check and try again.",
+                    "code": "INVALID_PASSWORD"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        if not user.is_active:
+            return Response(
+                {"error": "This account is disabled."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": UserSerializer(user).data
+        }, status=status.HTTP_200_OK)
+
+class QuickGuestView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        import random
+        import re
+        import uuid
+
+        requested_name = request.data.get('username', '').strip()
+        if not requested_name:
+            requested_name = f"Coder_{random.randint(100, 999)}"
+
+        safe_name = re.sub(r'[^a-zA-Z0-9_]', '', requested_name)[:20]
+        if not safe_name:
+            safe_name = f"Guest_{random.randint(100, 999)}"
+
+        # Check if user exists
+        user = User.objects.filter(username__iexact=safe_name).first()
+        if not user:
+            user = User.objects.create_user(
+                username=safe_name,
+                password=str(uuid.uuid4())[:12]
+            )
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": UserSerializer(user).data
+        }, status=status.HTTP_200_OK)
+
 class CurrentUserView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

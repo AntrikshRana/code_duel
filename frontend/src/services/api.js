@@ -31,15 +31,28 @@ async function request(endpoint, options = {}) {
     ...(options.headers || {})
   };
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers
+    });
+  } catch (netErr) {
+    throw new Error('Unable to connect to server. Please ensure the backend is running on port 8000.');
+  }
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.detail || data.error || (data.password && data.password[0]) || (data.username && data.username[0]) || 'API request failed');
+    const msg = data.error || 
+      data.detail || 
+      (Array.isArray(data.password) ? data.password[0] : (typeof data.password === 'string' ? data.password : null)) ||
+      (Array.isArray(data.username) ? data.username[0] : (typeof data.username === 'string' ? data.username : null)) ||
+      'API request failed';
+    const err = new Error(msg);
+    err.data = data;
+    err.status = response.status;
+    throw err;
   }
 
   return data;
@@ -62,14 +75,23 @@ export const api = {
       body: JSON.stringify({ username, password })
     });
     setAuthToken(res.access);
-    // Fetch profile
-    const user = await request('/auth/me/');
+    const user = res.user || (await request('/auth/me/'));
     setCurrentUserStored(user);
     return { tokens: res, user };
+  },
+  guestLogin: async (username = '') => {
+    const res = await request('/auth/guest/', {
+      method: 'POST',
+      body: JSON.stringify({ username })
+    });
+    setAuthToken(res.access);
+    setCurrentUserStored(res.user);
+    return { tokens: res, user: res.user };
   },
   getMe: async () => request('/auth/me/'),
   getLeaderboard: async () => request('/auth/leaderboard/'),
   getOnlineStats: async () => request('/auth/online-stats/'),
+
 
   // Problems
   getProblems: async () => request('/problems/'),

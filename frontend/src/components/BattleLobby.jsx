@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Swords, Plus, LogIn, Users, Flame, Zap, Trophy, Shield, RefreshCw, Radio, X, CheckCircle2, Sparkles } from 'lucide-react';
 import { api } from '../services/api';
 
-export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
+export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuccess }) {
   const [activeBattles, setActiveBattles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [roomCodeInput, setRoomCodeInput] = useState('');
@@ -40,6 +40,29 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
       console.error("Failed to load active battles", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasteCode = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setRoomCodeInput(text.trim().toUpperCase());
+      }
+    } catch (err) {
+      // clipboard read not permitted or empty
+    }
+  };
+
+  const handleGuestQuickStart = async () => {
+    setActionLoading(true);
+    try {
+      const res = await api.guestLogin();
+      if (onAuthSuccess) onAuthSuccess(res.user);
+    } catch (err) {
+      onOpenAuth();
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -161,6 +184,63 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
 
   return (
     <div style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
+      {/* Friendly Guest Onboarding Banner */}
+      {!user && (
+        <div style={{
+          background: 'rgba(0, 242, 254, 0.07)',
+          border: '1px solid rgba(0, 242, 254, 0.22)',
+          borderRadius: '14px',
+          padding: '1rem 1.4rem',
+          marginBottom: '1.75rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '9px',
+              background: 'rgba(0, 242, 254, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#00f2fe'
+            }}>
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.98rem', color: '#fff' }}>
+                Welcome to CodeDuel! Jump into a 1v1 battle now
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                Sign in to save your ranking, or try an instant guest match in one click.
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <button
+              onClick={onOpenAuth}
+              className="secondary-btn"
+              style={{ fontSize: '0.82rem', padding: '0.5rem 0.95rem' }}
+            >
+              Sign In / Register
+            </button>
+            <button
+              onClick={handleGuestQuickStart}
+              disabled={actionLoading}
+              className="battle-btn"
+              style={{ fontSize: '0.82rem', padding: '0.5rem 1rem' }}
+            >
+              <Zap size={14} />
+              <span>Instant Guest Play</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Battle Banner */}
       <div className="glass-panel" style={{
         padding: '3rem 2.5rem',
@@ -172,6 +252,7 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
         background: 'linear-gradient(135deg, rgba(20, 27, 42, 0.9) 0%, rgba(30, 15, 30, 0.8) 100%)'
       }}>
         <div style={{ maxWidth: '680px', position: 'relative', zIndex: 2 }}>
+
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -315,28 +396,55 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth }) {
           </p>
 
           <form onSubmit={handleJoinWithCode} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            <input 
-              type="text"
-              placeholder="e.g. 8K2M9P"
-              maxLength={10}
-              value={roomCodeInput}
-              onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '0.75rem 1rem',
-                color: 'var(--text-main)',
-                fontSize: '1.1rem',
-                fontFamily: 'var(--font-code)',
-                fontWeight: 700,
-                textAlign: 'center',
-                letterSpacing: '0.15em',
-                outline: 'none'
-              }}
-            />
+            <div style={{ position: 'relative' }}>
+              <input 
+                type="text"
+                placeholder="e.g. 8K2M9P"
+                maxLength={10}
+                value={roomCodeInput}
+                onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
+                style={{
+                  width: '100%',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.75rem 4.5rem 0.75rem 1rem',
+                  color: 'var(--text-main)',
+                  fontSize: '1.1rem',
+                  fontFamily: 'var(--font-code)',
+                  fontWeight: 700,
+                  textAlign: 'center',
+                  letterSpacing: '0.15em',
+                  outline: 'none'
+                }}
+              />
+              <button
+                type="button"
+                onClick={handlePasteCode}
+                title="Paste from clipboard"
+                style={{
+                  position: 'absolute',
+                  right: '0.6rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '6px',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  padding: '0.35rem 0.65rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
+              >
+                Paste
+              </button>
+            </div>
             <button 
-              type="submit"
+              type="submit" 
               disabled={actionLoading || !roomCodeInput}
               className="glow-btn"
               style={{ justifyContent: 'center' }}

@@ -508,5 +508,22 @@ class Command(BaseCommand):
         TestCase.objects.create(problem=edit_dist, input_data="kitten\nsitting", expected_output="3", is_hidden=True, order=4)
         TestCase.objects.create(problem=edit_dist, input_data="\na", expected_output="1", is_hidden=True, order=5)
 
-        self.stdout.write(self.style.SUCCESS("Successfully seeded 20 comprehensive DSA problems with sample & hidden test cases (No demo accounts)!"))
+        # ==========================================
+        # ENSURE DEMO TEST ACCOUNT EXISTS
+        # ==========================================
+        from django.contrib.auth.models import User
+        if not User.objects.filter(username="demo_coder").exists():
+            demo_user = User.objects.create_user(
+                username="demo_coder",
+                email="demo@codeduel.dev",
+                password="password123"
+            )
+            demo_user.profile.rating = 150
+            demo_user.profile.wins = 3
+            demo_user.profile.losses = 1
+            demo_user.profile.save()
+            self.stdout.write(self.style.SUCCESS("Created demo user 'demo_coder' (password: password123)"))
+
+        self.stdout.write(self.style.SUCCESS("Successfully seeded 20 comprehensive DSA problems with sample & hidden test cases!"))
+
 
