@@ -96,14 +96,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     }
   };
 
-  const fillDemoAccount = () => {
-    setIsRegister(false);
-    setUsername('demo_coder');
-    setPassword('password123');
-    setError('');
-    setSuggestedRegister(null);
-  };
-
   return (
     <div style={{
       position: 'fixed',
@@ -383,47 +375,34 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           </button>
         </form>
 
-        {/* Helpful Alternatives: Demo / Guest */}
-        <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={fillDemoAccount}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-muted)',
-                fontSize: '0.78rem',
-                cursor: 'pointer',
-                textDecoration: 'underline',
-                padding: '0.2rem'
-              }}
-            >
-              Fill demo account (<code style={{ color: '#00f2fe' }}>demo_coder</code>)
-            </button>
-
-            <button
-              type="button"
-              onClick={handleGuestLogin}
-              disabled={loading}
-              style={{
-                background: 'rgba(0, 242, 254, 0.1)',
-                border: '1px solid rgba(0, 242, 254, 0.25)',
-                color: '#00f2fe',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                borderRadius: '6px',
-                padding: '0.35rem 0.75rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem'
-              }}
-            >
-              <Zap size={13} />
-              <span>Instant Guest Mode</span>
-            </button>
-          </div>
+        {/* Instant Guest Mode Option */}
+        <div style={{ marginTop: '1.5rem', paddingTop: '1.2rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', textAlign: 'center' }}>
+          <button
+            type="button"
+            onClick={handleGuestLogin}
+            disabled={loading}
+            style={{
+              background: 'rgba(0, 242, 254, 0.08)',
+              border: '1px solid rgba(0, 242, 254, 0.25)',
+              color: '#00f2fe',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              borderRadius: '8px',
+              padding: '0.55rem 1rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              width: '100%',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0, 242, 254, 0.16)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0, 242, 254, 0.08)'; }}
+          >
+            <Zap size={14} />
+            <span>Play as Guest (No Account Needed)</span>
+          </button>
         </div>
       </div>
     </div>

@@ -48,10 +48,8 @@ daphne -b 127.0.0.1 -p 8000 codeduel.asgi:application
 
 The backend will be running at `http://127.0.0.1:8000`.
 
-> **Note on logging in:** If you want to sign in immediately without registering, use the pre-seeded demo account:
-> - **Username**: `demo_coder`
-> - **Password**: `password123`
-> Or click **"Instant Guest Play"** in the app.
+> **Note on getting started:** You can register any username in 2 seconds, or click **"Instant Guest Play"** to jump into 1v1 battles immediately without creating an account.
+
 
 ---
 
