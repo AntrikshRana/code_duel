@@ -7,12 +7,11 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
       position: 'sticky',
       top: 0,
       zIndex: 100,
-      background: 'rgba(13, 17, 26, 0.85)',
-      backdropFilter: 'blur(16px)',
-      borderBottom: '1px solid var(--border-subtle)',
+      background: '#f4f3ef',
+      borderBottom: '1px solid #dcdad2',
       padding: '0.75rem 2rem'
     }}>
-      <div style={{
+      <div className="site-brand-name" style={{
         maxWidth: '1440px',
         margin: '0 auto',
         display: 'flex',
@@ -34,12 +33,12 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
           <div style={{
             width: '40px',
             height: '40px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #f43f5e, #8b5cf6)',
+            borderRadius: '3px',
+            background: '#35443a',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(244, 63, 94, 0.4)'
+            boxShadow: 'none'
           }}>
             <Swords size={22} color="#ffffff" />
           </div>
@@ -49,12 +48,10 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
               fontSize: '1.35rem',
               fontWeight: 800,
               letterSpacing: '-0.02em',
-              background: 'linear-gradient(90deg, #ffffff, #94a3b8)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: '#263029',
               lineHeight: 1.1
             }}>
-              CODE<span style={{ color: '#00f2fe', WebkitTextFillColor: '#00f2fe' }}>DUEL</span>
+              CODEDUEL
             </div>
             <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600 }}>
               1v1 Code Arena
@@ -63,14 +60,14 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
         </div>
 
         {/* Navigation items */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <nav className="site-nav" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <button 
             onClick={() => setActiveTab('lobby')}
-            className="secondary-btn"
+            className={`secondary-btn${activeTab === 'lobby' ? ' is-active' : ''}`}
             style={{
-              background: activeTab === 'lobby' ? 'rgba(244, 63, 94, 0.15)' : 'transparent',
-              borderColor: activeTab === 'lobby' ? 'rgba(244, 63, 94, 0.4)' : 'transparent',
-              color: activeTab === 'lobby' ? '#f43f5e' : 'var(--text-muted)'
+              background: activeTab === 'lobby' ? '#e6e5de' : 'transparent',
+              borderColor: activeTab === 'lobby' ? '#bdbbb2' : 'transparent',
+              color: activeTab === 'lobby' ? '#263029' : '#68716b'
             }}
           >
             <Swords size={18} />
@@ -79,11 +76,11 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
 
           <button 
             onClick={() => setActiveTab('problems')}
-            className="secondary-btn"
+            className={`secondary-btn${activeTab === 'problems' ? ' is-active' : ''}`}
             style={{
-              background: activeTab === 'problems' ? 'rgba(0, 242, 254, 0.15)' : 'transparent',
-              borderColor: activeTab === 'problems' ? 'rgba(0, 242, 254, 0.4)' : 'transparent',
-              color: activeTab === 'problems' ? '#00f2fe' : 'var(--text-muted)'
+              background: activeTab === 'problems' ? '#e6e5de' : 'transparent',
+              borderColor: activeTab === 'problems' ? '#bdbbb2' : 'transparent',
+              color: activeTab === 'problems' ? '#263029' : '#68716b'
             }}
           >
             <Code2 size={18} />
@@ -92,11 +89,11 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
 
           <button 
             onClick={() => setActiveTab('leaderboard')}
-            className="secondary-btn"
+            className={`secondary-btn${activeTab === 'leaderboard' ? ' is-active' : ''}`}
             style={{
-              background: activeTab === 'leaderboard' ? 'rgba(251, 191, 36, 0.15)' : 'transparent',
-              borderColor: activeTab === 'leaderboard' ? 'rgba(251, 191, 36, 0.4)' : 'transparent',
-              color: activeTab === 'leaderboard' ? '#fbbf24' : 'var(--text-muted)'
+              background: activeTab === 'leaderboard' ? '#e6e5de' : 'transparent',
+              borderColor: activeTab === 'leaderboard' ? '#bdbbb2' : 'transparent',
+              color: activeTab === 'leaderboard' ? '#263029' : '#68716b'
             }}
           >
             <Trophy size={18} />
@@ -112,22 +109,22 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.65rem',
-                background: 'rgba(20, 27, 42, 0.8)',
-                padding: '0.4rem 0.9rem',
-                borderRadius: 'var(--radius-full)',
+                background: 'transparent',
+                padding: '0.25rem 0.4rem',
+                borderRadius: '3px',
                 border: '1px solid var(--border-subtle)'
               }}>
                 <div style={{
                   width: '28px',
                   height: '28px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #3b82f6, #00f2fe)',
+                  background: '#65786a',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 700,
                   fontSize: '0.8rem',
-                  color: '#07090e'
+                  color: '#fffefa'
                 }}>
                   {user.username.charAt(0).toUpperCase()}
                 </div>
@@ -165,7 +162,7 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
                 onClick={onLogout}
                 className="secondary-btn"
                 title="Logout"
-                style={{ padding: '0.5rem', borderRadius: '50%' }}
+                style={{ padding: '0.5rem', borderRadius: '3px' }}
               >
                 <LogOut size={16} />
               </button>

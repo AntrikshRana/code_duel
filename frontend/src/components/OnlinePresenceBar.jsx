@@ -30,8 +30,7 @@ export default function OnlinePresenceBar() {
       position: 'sticky',
       bottom: 0,
       zIndex: 90,
-      background: 'rgba(7, 9, 14, 0.92)',
-      backdropFilter: 'blur(16px)',
+      background: '#f4f3ef',
       borderTop: '1px solid var(--border-subtle)',
       padding: '0.55rem 2rem'
     }}>
@@ -51,19 +50,19 @@ export default function OnlinePresenceBar() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.45rem',
-            background: 'rgba(16, 185, 129, 0.12)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: 'var(--radius-full)',
+            background: 'transparent',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: '2px',
             padding: '0.25rem 0.75rem',
-            color: '#34d399',
+            color: '#55765e',
             fontWeight: 700
           }}>
             <span style={{
               width: '7px',
               height: '7px',
               borderRadius: '50%',
-              background: '#34d399',
-              boxShadow: '0 0 10px #34d399',
+              background: '#55765e',
+              boxShadow: 'none',
               display: 'inline-block'
             }} className="animate-pulse-subtle" />
             <span>{stats.online_users} {stats.online_users === 1 ? 'Gladiator' : 'Gladiators'} Online</span>
@@ -71,12 +70,12 @@ export default function OnlinePresenceBar() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)' }}>
             <Swords size={14} color="var(--accent-rose)" />
-            <span><strong style={{ color: '#ffffff' }}>{stats.in_battles}</strong> in active clashes</span>
+            <span>            <strong style={{ color: 'var(--text-main)' }}>{stats.in_battles}</strong> in active clashes</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-muted)' }}>
             <Activity size={14} color="var(--accent-cyan)" />
-            <span><strong style={{ color: '#ffffff' }}>{stats.in_queue}</strong> in matchmaking queue</span>
+            <span>            <strong style={{ color: 'var(--text-main)' }}>{stats.in_queue}</strong> in matchmaking queue</span>
           </div>
         </div>
 

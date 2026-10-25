@@ -30,12 +30,12 @@ export default function ProblemLibrary({ onSelectProblem, onDuelProblem }) {
   });
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
+    <div className="problem-library-page" style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
       {/* Header section */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-            Problem <span style={{ color: '#00f2fe' }}>Library</span>
+            Problem <span style={{ color: 'var(--accent-cyan)' }}>Library</span>
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
             Curated algorithmic challenges. Practice in solo sandbox or challenge opponents in 1v1 duels.
@@ -91,7 +91,7 @@ export default function ProblemLibrary({ onSelectProblem, onDuelProblem }) {
       {/* Problems List */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-          <div className="animate-spin" style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid rgba(0, 242, 254, 0.2)', borderTopColor: '#00f2fe', borderRadius: '50%', marginBottom: '1rem' }} />
+          <div className="animate-spin" style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid #dcdad2', borderTopColor: '#53766b', borderRadius: '50%', marginBottom: '1rem' }} />
           <div>Loading competitive challenges...</div>
         </div>
       ) : filtered.length === 0 ? (

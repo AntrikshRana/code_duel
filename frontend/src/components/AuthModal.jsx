@@ -97,26 +97,24 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   };
 
   return (
-    <div style={{
+    <div className="auth-overlay" style={{
       position: 'fixed',
       inset: 0,
       zIndex: 1000,
-      background: 'rgba(5, 8, 15, 0.88)',
-      backdropFilter: 'blur(10px)',
+      background: 'rgba(32, 35, 32, 0.58)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '1rem',
-      animation: 'fadeIn 0.2s ease-out'
     }}>
-      <div className="glass-panel" style={{
+      <div className="glass-panel auth-dialog" style={{
         width: '100%',
         maxWidth: '430px',
         padding: '2rem',
         position: 'relative',
-        border: '1px solid rgba(255, 255, 255, 0.12)',
-        borderRadius: '16px',
-        boxShadow: '0 24px 60px rgba(0, 0, 0, 0.7)'
+        border: '1px solid var(--border-subtle)',
+        borderRadius: '4px',
+        boxShadow: '0 12px 32px rgba(25, 28, 25, 0.18)'
       }}>
         {/* Close Button */}
         <button 
@@ -137,20 +135,18 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             justifyContent: 'center',
             transition: 'all 0.15s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
         >
           <X size={18} />
         </button>
 
         {/* Tab Switcher */}
-        <div style={{
+        <div className="auth-tabs" style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: '0.4rem',
-          background: 'rgba(15, 20, 32, 0.8)',
+          background: 'var(--bg-surface)',
           padding: '0.35rem',
-          borderRadius: '10px',
+          borderRadius: '3px',
           border: '1px solid var(--border-subtle)',
           marginBottom: '1.5rem'
         }}>
@@ -214,11 +210,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         {/* Error / Suggestion Banner */}
         {error && (
           <div style={{
-            background: suggestedRegister ? 'rgba(0, 242, 254, 0.08)' : 'rgba(244, 63, 94, 0.12)',
-            border: suggestedRegister ? '1px solid rgba(0, 242, 254, 0.35)' : '1px solid rgba(244, 63, 94, 0.35)',
-            color: suggestedRegister ? '#00f2fe' : '#f87171',
+            background: suggestedRegister ? '#e8efe8' : '#f3e9e6',
+            border: suggestedRegister ? '1px solid #cbd9cb' : '1px solid #e2ccc6',
+            color: suggestedRegister ? '#42644a' : '#8b5148',
             padding: '0.8rem 1rem',
-            borderRadius: '10px',
+            borderRadius: '3px',
             fontSize: '0.84rem',
             marginBottom: '1.25rem',
             lineHeight: 1.45
@@ -280,7 +276,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   outline: 'none',
                   transition: 'border-color 0.15s ease'
                 }}
-                onFocus={(e) => e.target.style.borderColor = 'rgba(0, 242, 254, 0.5)'}
+                onFocus={(e) => e.target.style.borderColor = '#899b89'}
                 onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
               />
             </div>
@@ -309,7 +305,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                     outline: 'none',
                     transition: 'border-color 0.15s ease'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = 'rgba(0, 242, 254, 0.5)'}
+                  onFocus={(e) => e.target.style.borderColor = '#899b89'}
                   onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
                 />
               </div>
@@ -339,7 +335,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   outline: 'none',
                   transition: 'border-color 0.15s ease'
                 }}
-                onFocus={(e) => e.target.style.borderColor = 'rgba(0, 242, 254, 0.5)'}
+                onFocus={(e) => e.target.style.borderColor = '#899b89'}
                 onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
               />
               <button
@@ -382,9 +378,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             onClick={handleGuestLogin}
             disabled={loading}
             style={{
-              background: 'rgba(0, 242, 254, 0.08)',
-              border: '1px solid rgba(0, 242, 254, 0.25)',
-              color: '#00f2fe',
+              background: '#e8efe8',
+              border: '1px solid #cbd9cb',
+              color: '#42644a',
               fontSize: '0.82rem',
               fontWeight: 600,
               cursor: 'pointer',
@@ -397,8 +393,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               width: '100%',
               transition: 'all 0.15s ease'
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0, 242, 254, 0.16)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0, 242, 254, 0.08)'; }}
           >
             <Zap size={14} />
             <span>Play as Guest (No Account Needed)</span>

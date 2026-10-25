@@ -183,13 +183,13 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
   const formattedSearchTime = `${String(searchMinutes).padStart(2, '0')}:${String(searchSecs).padStart(2, '0')}`;
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
+    <div className="lobby-page" style={{ maxWidth: '1280px', margin: '2rem auto', padding: '0 1.5rem' }}>
       {/* Friendly Guest Onboarding Banner */}
       {!user && (
-        <div style={{
-          background: 'rgba(0, 242, 254, 0.07)',
-          border: '1px solid rgba(0, 242, 254, 0.22)',
-          borderRadius: '14px',
+        <div className="lobby-welcome" style={{
+          background: '#ecefe9',
+          border: '1px solid #d5d9d1',
+          borderRadius: '4px',
           padding: '1rem 1.4rem',
           marginBottom: '1.75rem',
           display: 'flex',
@@ -203,16 +203,16 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
               width: '38px',
               height: '38px',
               borderRadius: '9px',
-              background: 'rgba(0, 242, 254, 0.15)',
+              background: '#dfe5dc',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#00f2fe'
+              color: '#53766b'
             }}>
               <Sparkles size={20} />
             </div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.98rem', color: '#fff' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.98rem', color: 'var(--text-main)' }}>
                 Welcome to CodeDuel! Jump into a 1v1 battle now
               </div>
               <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
@@ -242,14 +242,14 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
       )}
 
       {/* Hero Battle Banner */}
-      <div className="glass-panel" style={{
+      <div className="lobby-hero glass-panel" style={{
         padding: '3rem 2.5rem',
         borderRadius: 'var(--radius-lg)',
         marginBottom: '2.5rem',
         position: 'relative',
         overflow: 'hidden',
-        border: '1px solid rgba(244, 63, 94, 0.25)',
-        background: 'linear-gradient(135deg, rgba(20, 27, 42, 0.9) 0%, rgba(30, 15, 30, 0.8) 100%)'
+        border: '1px solid #dcdad2',
+        background: '#fffefa'
       }}>
         <div style={{ maxWidth: '680px', position: 'relative', zIndex: 2 }}>
 
@@ -257,10 +257,10 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.5rem',
-            background: 'rgba(244, 63, 94, 0.15)',
-            color: '#f43f5e',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
-            borderRadius: 'var(--radius-full)',
+            background: '#eeede8',
+            color: '#68716b',
+            border: '1px solid #dcdad2',
+            borderRadius: '2px',
             padding: '0.35rem 0.9rem',
             fontSize: '0.78rem',
             fontWeight: 700,
@@ -269,18 +269,11 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
             textTransform: 'uppercase'
           }}>
             <Zap size={14} />
-            ELO Competitive Matchmaking Engine
+            Live ranked matchmaking
           </div>
 
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: '1rem' }}>
-            FIND AN OPPONENT & <br />
-            <span style={{
-              background: 'linear-gradient(90deg, #f43f5e, #a855f7, #00f2fe)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
-            }}>
-              CLASH IN REAL-TIME 1v1
-            </span>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.18, marginBottom: '1rem' }}>
+            Two coders. One problem. First to solve it wins.
           </h1>
 
           <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.6, marginBottom: '1.75rem' }}>
@@ -294,10 +287,10 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.65rem' }}>
               {[
-                { id: 'ANY', label: 'Any Tier', time: 'Random', color: '#00f2fe' },
-                { id: 'EASY', label: 'Easy Tier', time: '15m Code', color: '#34d399' },
-                { id: 'MEDIUM', label: 'Medium Tier', time: '25m Code', color: '#fbbf24' },
-                { id: 'HARD', label: 'Hard Tier', time: '35m Code', color: '#f87171' }
+                { id: 'ANY', label: 'Any Tier', time: 'Random', color: '#53766b' },
+                { id: 'EASY', label: 'Easy Tier', time: '15m Code', color: '#55765e' },
+                { id: 'MEDIUM', label: 'Medium Tier', time: '25m Code', color: '#947440' },
+                { id: 'HARD', label: 'Hard Tier', time: '35m Code', color: '#a15f58' }
               ].map(tier => {
                 const isSelected = difficultyPref === tier.id;
                 return (
@@ -306,14 +299,14 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
                     onClick={() => setDifficultyPref(tier.id)}
                     type="button"
                     style={{
-                      background: isSelected ? 'rgba(20, 27, 42, 0.95)' : 'rgba(255, 255, 255, 0.03)',
-                      border: isSelected ? `2px solid ${tier.color}` : '1px solid var(--border-subtle)',
-                      boxShadow: isSelected ? `0 0 15px ${tier.color}40` : 'none',
+                      background: isSelected ? '#eeede8' : '#fffefa',
+                      border: isSelected ? `1px solid ${tier.color}` : '1px solid var(--border-subtle)',
+                      boxShadow: 'none',
                       borderRadius: 'var(--radius-sm)',
                       padding: '0.65rem 0.75rem',
                       textAlign: 'left',
                       cursor: 'pointer',
-                      transition: 'all 0.2s ease',
+                      transition: 'none',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: '0.2rem'
@@ -343,7 +336,7 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
                 <Swords size={20} />
                 <span>Enter Matchmaking Queue</span>
               </button>
-              <div style={{ fontSize: '0.72rem', color: '#34d399', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.45rem', fontWeight: 600 }}>
+              <div style={{ fontSize: '0.72rem', color: '#55765e', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.45rem', fontWeight: 600 }}>
                 🔥 Ranked Mode: Awards Rating Points & Win Streaks
               </div>
             </div>
@@ -358,7 +351,7 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
                 <Plus size={18} />
                 <span>Create Custom Room</span>
               </button>
-              <div style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.45rem', fontWeight: 500 }}>
+              <div style={{ fontSize: '0.72rem', color: '#68716b', display: 'flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.45rem', fontWeight: 500 }}>
                 🎮 Casual Practice: Unrated (No points earned)
               </div>
             </div>
@@ -371,17 +364,6 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
           )}
         </div>
 
-        {/* Ambient background accent */}
-        <div style={{
-          position: 'absolute',
-          right: '-50px',
-          top: '-50px',
-          width: '380px',
-          height: '380px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(244, 63, 94, 0.2) 0%, transparent 70%)',
-          pointerEvents: 'none'
-        }} />
       </div>
 
       {/* Join By Room Code Box & Active Rooms List */}
@@ -437,8 +419,6 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
                   cursor: 'pointer',
                   transition: 'all 0.15s ease'
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; }}
               >
                 Paste
               </button>
@@ -521,9 +501,9 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
                       </div>
 
                       <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ color: '#ffffff', fontWeight: 600 }}>{b.player1_name}</span> ({b.player1_rating} pts {b.player1_streak > 0 ? `🔥${b.player1_streak}` : ''})
+                        <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{b.player1_name}</span> ({b.player1_rating} pts {b.player1_streak > 0 ? `🔥${b.player1_streak}` : ''})
                         <span style={{ color: 'var(--text-dim)' }}>vs</span>
-                        <span style={{ color: b.player2_name ? '#ffffff' : 'var(--accent-amber)', fontWeight: 600 }}>
+                        <span style={{ color: b.player2_name ? 'var(--text-main)' : 'var(--accent-amber)', fontWeight: 600 }}>
                           {b.player2_name ? `${b.player2_name} (${b.player2_rating} pts ${b.player2_streak > 0 ? `🔥${b.player2_streak}` : ''})` : 'Waiting for opponent...'}
                         </span>
                       </div>
@@ -561,14 +541,13 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
       </div>
 
       {/* ========================================== */}
-      {/* ANIMATED MATCHMAKING RADAR OVERLAY MODAL */}
+      {/* Matchmaking status modal */}
       {/* ========================================== */}
       {isSearching && (
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(7, 9, 14, 0.88)',
-          backdropFilter: 'blur(16px)',
+          background: 'rgba(32, 35, 32, 0.58)',
           zIndex: 3000,
           display: 'flex',
           alignItems: 'center',
@@ -581,36 +560,13 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
             padding: '2.5rem',
             textAlign: 'center',
             position: 'relative',
-            border: matchedPayload ? '1px solid rgba(0, 242, 254, 0.5)' : '1px solid rgba(244, 63, 94, 0.35)',
-            boxShadow: matchedPayload ? 'var(--shadow-glow-cyan)' : 'var(--shadow-glow-battle)'
+            border: '1px solid var(--border-subtle)',
+            boxShadow: 'none'
           }}>
             {!matchedPayload ? (
               <>
-                {/* Radar sweep icon */}
-                <div style={{ position: 'relative', width: '90px', height: '90px', margin: '0 auto 1.5rem auto' }}>
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    borderRadius: '50%',
-                    border: '2px dashed rgba(244, 63, 94, 0.4)',
-                    animation: 'spin 8s linear infinite'
-                  }} />
-                  <div style={{
-                    position: 'absolute',
-                    inset: '12px',
-                    borderRadius: '50%',
-                    border: '2px solid rgba(0, 242, 254, 0.4)',
-                    animation: 'spin 4s linear infinite reverse'
-                  }} />
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Radio size={36} color="var(--accent-rose)" className="animate-pulse-subtle" />
-                  </div>
+                <div style={{ marginBottom: '1.25rem', color: 'var(--accent-cyan)' }}>
+                  <Radio size={28} />
                 </div>
 
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.7rem', fontWeight: 800, marginBottom: '0.4rem' }}>
@@ -657,14 +613,14 @@ export default function BattleLobby({ user, onEnterBattle, onOpenAuth, onAuthSuc
                   width: '72px',
                   height: '72px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #00f2fe, #3b82f6)',
+                  background: '#65786a',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   marginBottom: '1rem',
-                  boxShadow: 'var(--shadow-glow-cyan)'
+                  boxShadow: 'none'
                 }}>
-                  <CheckCircle2 size={40} color="#07090e" />
+                  <CheckCircle2 size={40} color="#fffefa" />
                 </div>
 
                 <div style={{ color: 'var(--accent-cyan)', fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.3rem' }}>

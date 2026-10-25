@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { Play, Send, RotateCcw, Clock, Cpu, CheckCircle2, XCircle, AlertTriangle, ArrowLeft, Terminal, FileCode2 } from 'lucide-react';
 import { api } from '../services/api';
+import ProblemSlideOver from './ProblemSlideOver';
 
 export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
   const [problem, setProblem] = useState(null);
@@ -11,6 +12,7 @@ export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
   const [submitting, setSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] = useState(null);
   const [activeConsoleTab, setActiveConsoleTab] = useState('output');
+  const [isProblemOpen, setIsProblemOpen] = useState(false);
 
   useEffect(() => {
     fetchProblemDetails();
@@ -77,7 +79,7 @@ export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
   if (loading || !problem) {
     return (
       <div style={{ textAlign: 'center', padding: '6rem 0', color: 'var(--text-muted)' }}>
-        <div className="animate-spin" style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid rgba(0, 242, 254, 0.2)', borderTopColor: '#00f2fe', borderRadius: '50%', marginBottom: '1rem' }} />
+        <div className="animate-spin" style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid #dcdad2', borderTopColor: '#53766b', borderRadius: '50%', marginBottom: '1rem' }} />
         <div>Preparing workspace environment...</div>
       </div>
     );
@@ -86,20 +88,20 @@ export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
   const badgeClass = problem.difficulty === 'EASY' ? 'badge-easy' : problem.difficulty === 'MEDIUM' ? 'badge-medium' : 'badge-hard';
 
   return (
-    <div style={{
+    <div className="coding-shell" style={{
       display: 'flex',
       flexDirection: 'column',
       height: 'calc(100vh - 75px)',
-      background: 'var(--bg-darker)'
+      background: '#e9e8e2'
     }}>
       {/* Top action bar */}
-      <div style={{
+      <div className="workspace-topbar" style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0.65rem 1.5rem',
-        background: 'var(--bg-dark)',
-        borderBottom: '1px solid var(--border-subtle)',
+        background: 'rgba(247, 253, 252, 0.82)',
+        borderBottom: '1px solid rgba(79, 142, 150, 0.2)',
         gap: '1rem',
         flexWrap: 'wrap'
       }}>
@@ -110,7 +112,7 @@ export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
             <span>Library</span>
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', color: '#17353c' }}>
               {problem.title}
             </span>
             <span className={`badge ${badgeClass}`}>{problem.difficulty}</span>
@@ -178,81 +180,17 @@ export default function CodeWorkspace({ problemId, onBack, onDuelThis }) {
         </div>
       </div>
 
-      {/* Main Split Body */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', flex: 1, overflow: 'hidden' }}>
-        {/* Left Pane: Description & Test cases */}
-        <div style={{
-          overflowY: 'auto',
-          padding: '1.75rem',
-          borderRight: '1px solid var(--border-subtle)',
-          background: 'rgba(13, 17, 26, 0.4)'
-        }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 800, marginBottom: '0.5rem' }}>
-              Description
-            </h2>
-            <div style={{ color: '#cbd5e1', lineHeight: 1.7, fontSize: '0.92rem', whiteSpace: 'pre-wrap' }}>
-              {problem.description}
-            </div>
+      <div className="problem-stage">
+        <div className="problem-editor">
+          <div className="workspace-editor-toolbar">
+            <span className="editor-context">Code editor <span>/</span> main</span>
+            <ProblemSlideOver
+              problem={problem}
+              isOpen={isProblemOpen}
+              onToggle={() => setIsProblemOpen(true)}
+              onClose={() => setIsProblemOpen(false)}
+            />
           </div>
-
-          {problem.constraints && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Constraints
-              </h3>
-              <pre style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '0.85rem',
-                fontSize: '0.82rem',
-                color: 'var(--accent-amber)',
-                fontFamily: 'var(--font-code)'
-              }}>
-                {problem.constraints}
-              </pre>
-            </div>
-          )}
-
-          {/* Sample Test Cases */}
-          {problem.sample_tests && problem.sample_tests.length > 0 && (
-            <div>
-              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Sample Test Cases
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                {problem.sample_tests.map((sample, idx) => (
-                  <div key={sample.id} style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '0.85rem'
-                  }}>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', fontWeight: 700, marginBottom: '0.5rem' }}>
-                      EXAMPLE #{idx + 1}
-                    </div>
-                    <div style={{ marginBottom: '0.5rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>Input:</span>
-                      <pre style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '4px', fontSize: '0.82rem', fontFamily: 'var(--font-code)', color: '#93c5fd' }}>
-                        {sample.input_data}
-                      </pre>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>Expected Output:</span>
-                      <pre style={{ background: 'rgba(0,0,0,0.3)', padding: '0.4rem 0.6rem', borderRadius: '4px', fontSize: '0.82rem', fontFamily: 'var(--font-code)', color: '#86efac' }}>
-                        {sample.expected_output}
-                      </pre>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Pane: Monaco Code Editor + Output Drawer */}
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
           {/* Editor Container */}
           <div style={{ flex: 1, minHeight: '320px', position: 'relative' }}>
             <Editor
