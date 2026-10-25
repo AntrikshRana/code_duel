@@ -22,16 +22,16 @@ export default function Leaderboard() {
   };
 
   return (
-    <div style={{ maxWidth: '1080px', margin: '2rem auto', padding: '0 1.5rem' }}>
+    <div className="leaderboard-page" style={{ maxWidth: '1080px', margin: '2rem auto', padding: '0 1.5rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
         <div style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: '0.5rem',
-          background: 'rgba(251, 191, 36, 0.15)',
-          color: '#fbbf24',
-          border: '1px solid rgba(251, 191, 36, 0.3)',
-          borderRadius: 'var(--radius-full)',
+          background: '#f2eee2',
+          color: '#80652f',
+          border: '1px solid #e2d7bc',
+          borderRadius: '3px',
           padding: '0.35rem 0.9rem',
           fontSize: '0.78rem',
           fontWeight: 700,
@@ -43,7 +43,7 @@ export default function Leaderboard() {
         </div>
 
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.6rem', fontWeight: 900, letterSpacing: '-0.02em' }}>
-          GLOBAL <span style={{ color: '#fbbf24' }}>LEADERBOARD</span>
+          GLOBAL <span style={{ color: '#80652f' }}>LEADERBOARD</span>
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.35rem' }}>
           Ranked by competitive rating points earned through real-time head-to-head 1v1 battles.
@@ -52,7 +52,7 @@ export default function Leaderboard() {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-          <div className="animate-spin" style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid rgba(251, 191, 36, 0.2)', borderTopColor: '#fbbf24', borderRadius: '50%', marginBottom: '1rem' }} />
+          <div className="animate-spin" style={{ display: 'inline-block', width: '32px', height: '32px', border: '3px solid #dcdad2', borderTopColor: '#947440', borderRadius: '50%', marginBottom: '1rem' }} />
           <div>Retrieving rankings...</div>
         </div>
       ) : (
@@ -81,7 +81,7 @@ export default function Leaderboard() {
             {leaders.map((p, index) => {
               const rank = index + 1;
               const isTop3 = rank <= 3;
-              const rankColor = rank === 1 ? '#fbbf24' : rank === 2 ? '#e2e8f0' : rank === 3 ? '#b45309' : 'var(--text-dim)';
+              const rankColor = rank === 1 ? '#947440' : rank === 2 ? '#737b73' : rank === 3 ? '#8c5f57' : 'var(--text-dim)';
 
               return (
                 <div 
@@ -117,18 +117,18 @@ export default function Leaderboard() {
                       width: '36px',
                       height: '36px',
                       borderRadius: '50%',
-                      background: isTop3 ? 'linear-gradient(135deg, #f59e0b, #ef4444)' : 'rgba(255, 255, 255, 0.08)',
+                      background: isTop3 ? '#8b7953' : '#e6e5de',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 700,
                       fontSize: '0.85rem',
-                      color: '#ffffff'
+                      color: '#fffefa'
                     }}>
                       {p.username.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: isTop3 ? '#ffffff' : 'var(--text-main)' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>
                         {p.username}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>
@@ -166,7 +166,7 @@ export default function Leaderboard() {
                         fontSize: '0.78rem',
                         fontWeight: 800,
                         padding: '0.15rem 0.5rem',
-                        borderRadius: '100px'
+                        borderRadius: '3px'
                       }}>
                         🔥 {p.current_streak}
                       </span>
